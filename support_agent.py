@@ -11,8 +11,9 @@ from typing import Optional
 from anthropic import Anthropic
 from datetime import datetime
 
-# Initialize Anthropic client
-client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+# Initialize Anthropic client (API key from environment)
+_api_key = os.getenv("ANTHROPIC_API_KEY")
+client = Anthropic(api_key=_api_key) if _api_key else None
 
 # Global data cache (loaded once on startup)
 _data_cache = {
@@ -335,6 +336,9 @@ Generate a friendly, helpful response that:
 
 Keep response to 2-3 sentences. Be warm but concise. Sign as Pretty Fly Support.
 """
+
+    if not client:
+        return "Support agent is not properly configured. Please set ANTHROPIC_API_KEY environment variable."
 
     try:
         response = client.messages.create(

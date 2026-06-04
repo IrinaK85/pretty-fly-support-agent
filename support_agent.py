@@ -253,12 +253,13 @@ def classify_issue(text: str) -> str:
     """Classify support issue"""
     text = text.lower()
 
-    if any(word in text for word in ["return", "exchange", "refund", "send back"]):
+    # Check order_status first (more specific)
+    if any(word in text for word in ["track", "delivery", "where", "received", "arrived", "pending", "shipped"]):
+        return "order_status"
+    elif any(word in text for word in ["return", "exchange", "refund", "send back"]):
         return "returns_exchanges"
     elif any(word in text for word in ["size", "fit", "too big", "too small"]):
         return "sizing_fit"
-    elif any(word in text for word in ["track", "delivery", "where", "arrived"]):
-        return "order_status"
     elif any(word in text for word in ["damaged", "broken", "quality", "defect"]):
         return "product_quality"
     else:
@@ -355,6 +356,9 @@ def generate_response(
     elif category == 'sizing_fit':
         routing = "Provide detailed sizing guidance using customer's size history. Offer exchanges if sizing is our issue."
         tone = "Helpful and informative"
+    elif category == 'order_status':
+        routing = "Provide order tracking: Reference their order from history, state the current status. Only escalate if order is lost/significantly delayed."
+        tone = "Reassuring and helpful"
     else:
         routing = "Provide quick, helpful answer. Escalate only if complex or unusual."
         tone = "Helpful and friendly"
@@ -406,6 +410,12 @@ For RETURNS/EXCHANGES:
 - Auto-approve immediately if within 30 days (any customer, no tier requirements)
 - Say: "I can process that exchange for you straight away. Your last order [order_id] qualifies. What size do you need?"
 - DO NOT ask "which order?" - use the order history provided
+
+For ORDER TRACKING / "WHERE'S MY ORDER?" questions:
+- Use their order history to reference their order(s) with specific order_id and date
+- State the order status from the history (e.g., "Fulfilled - your order arrived on...")
+- If status is "fulfilled" assume delivered, don't escalate unnecessarily
+- If order seems delayed/lost, escalate with: "I'm escalating this to our team for urgent review. You'll hear from us within 24 hours."
 
 For SIZING questions:
 - Use their order history to identify which product they're asking about

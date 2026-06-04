@@ -28,8 +28,10 @@ _data_cache = {
 # Conversation history storage
 _conversations = {}
 
-DATA_DIR = "data"
-FULL_DATA_DIR = "pretty_fly_data_pack/data"
+# Use absolute paths relative to this module
+_base_dir = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(_base_dir, "data")
+FULL_DATA_DIR = os.path.join(_base_dir, "pretty_fly_data_pack", "data")
 
 # LTV tier thresholds and routing rules
 LTV_TIERS = {
@@ -48,24 +50,24 @@ def load_data():
 
     try:
         # Load sample data for demo
-        _data_cache['customers'] = pd.read_csv(f"{DATA_DIR}/sample_customers.csv")
-        _data_cache['tickets'] = pd.read_csv(f"{DATA_DIR}/sample_tickets.csv")
+        _data_cache['customers'] = pd.read_csv(os.path.join(DATA_DIR, "sample_customers.csv"))
+        _data_cache['tickets'] = pd.read_csv(os.path.join(DATA_DIR, "sample_tickets.csv"))
 
-        # Load full dataset for context enrichment
+        # Load full dataset for context enrichment (optional)
         try:
-            _data_cache['orders'] = pd.read_csv(f"{FULL_DATA_DIR}/orders.csv")
-            _data_cache['line_items'] = pd.read_csv(f"{FULL_DATA_DIR}/line_items.csv")
-            _data_cache['products'] = pd.read_csv(f"{FULL_DATA_DIR}/products.csv")
-            _data_cache['refunds'] = pd.read_csv(f"{FULL_DATA_DIR}/refunds.csv")
-        except FileNotFoundError:
-            print("Warning: Full dataset not found, using sample data only")
+            _data_cache['orders'] = pd.read_csv(os.path.join(FULL_DATA_DIR, "orders.csv"))
+            _data_cache['line_items'] = pd.read_csv(os.path.join(FULL_DATA_DIR, "line_items.csv"))
+            _data_cache['products'] = pd.read_csv(os.path.join(FULL_DATA_DIR, "products.csv"))
+            _data_cache['refunds'] = pd.read_csv(os.path.join(FULL_DATA_DIR, "refunds.csv"))
+        except (FileNotFoundError, Exception) as e:
+            print(f"Warning: Full dataset not found ({e}), using sample data only for context")
 
         return True
-    except FileNotFoundError:
-        print(f"Warning: Sample data not found at {DATA_DIR}")
+    except FileNotFoundError as e:
+        print(f"Error: Sample data not found at {DATA_DIR}: {e}")
         return False
     except Exception as e:
-        print(f"Warning: Could not load data: {e}")
+        print(f"Error: Could not load data: {e}")
         return False
 
 

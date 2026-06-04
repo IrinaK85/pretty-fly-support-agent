@@ -114,34 +114,38 @@ def get_ltv_tier(ltv: float) -> str:
 
 def get_customer_order_history(customer_id: str, limit: int = 5) -> str:
     """Fetch customer's recent order history with status"""
-    load_data()
-    # Try full dataset first, fall back to sample data
-    orders_df = _data_cache['orders']
-    if orders_df is None or orders_df.empty:
-        try:
+    try:
+        load_data()
+        # Try full dataset first, fall back to sample data
+        orders_df = _data_cache['orders']
+        if orders_df is None or orders_df.empty:
             orders_df = pd.read_csv(os.path.join(DATA_DIR, "sample_orders.csv"))
-        except:
+
+        if orders_df is None or orders_df.empty:
             return ""
 
-    if orders_df is None or orders_df.empty:
+        # Ensure created_at is datetime for proper sorting
+        orders_df['created_at'] = pd.to_datetime(orders_df['created_at'], errors='coerce')
+
+        customer_orders = orders_df[orders_df['customer_id'] == customer_id].sort_values(
+            'created_at', ascending=False, na_position='last'
+        ).head(limit)
+
+        if customer_orders.empty:
+            return ""
+
+        context = "Recent Orders:\n"
+        for idx, (_, order) in enumerate(customer_orders.iterrows(), 1):
+            order_id = str(order.get('order_id', 'N/A'))
+            date = str(order.get('created_at', 'N/A'))[:10]
+            status = str(order.get('fulfillment_status', 'unknown')).title()
+            total = float(order.get('total_price', 0))
+            context += f"  {idx}. {order_id} ({date}) → {status} (£{total:.2f})\n"
+
+        return context.strip()
+    except Exception as e:
+        print(f"Error in get_customer_order_history: {e}")
         return ""
-
-    customer_orders = orders_df[orders_df['customer_id'] == customer_id].sort_values(
-        'created_at', ascending=False
-    ).head(limit)
-
-    if customer_orders.empty:
-        return ""
-
-    context = "Recent Orders:\n"
-    for idx, (_, order) in enumerate(customer_orders.iterrows(), 1):
-        order_id = order.get('order_id', 'N/A')
-        date = str(order.get('created_at', 'N/A'))[:10]
-        status = str(order.get('fulfillment_status', 'unknown')).title()
-        total = order.get('total_price', 0)
-        context += f"  {idx}. {order_id} ({date}) → {status} (£{total:.2f})\n"
-
-    return context.strip()
 
 
 def get_product_details(product_id: str) -> str:

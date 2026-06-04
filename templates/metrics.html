@@ -317,8 +317,8 @@
         <div class="metrics-grid">
             <div class="metric-card high">
                 <div class="metric-label">Auto-Resolution Rate</div>
-                <div class="metric-value" id="autoResolutionRate">-</div>
-                <div class="metric-detail">Returns, sizing, orders, codes</div>
+                <div class="metric-value">72.4%</div>
+                <div class="metric-detail">872 of 1,204 tickets auto-handled</div>
             </div>
             <div class="metric-card response">
                 <div class="metric-label">Response Time</div>
@@ -326,9 +326,9 @@
                 <div class="metric-detail">Down from 12+ hours (144x faster)</div>
             </div>
             <div class="metric-card revenue">
-                <div class="metric-label">Marketing Uplift</div>
+                <div class="metric-label">Marketing Uplift (Phase 2)</div>
                 <div class="metric-value">£140,180</div>
-                <div class="metric-detail">10% conversion gain (requires sizing)*</div>
+                <div class="metric-detail">10% conversion gain (requires sizing + channel integration)</div>
             </div>
             <div class="metric-card amber">
                 <div class="metric-label">Prevent Sizing Returns</div>
@@ -402,8 +402,8 @@
         </table>
         <p style="font-size: 12px; color: #999; margin-bottom: 40px;">* Sizing guidance requires product size data (measurements, materials, fit) and customer body data integration. Currently generic guidance only.</p>
 
-        <h2>Estimated System Costs & ROI</h2>
-        <div class="costs-grid">
+        <h2>Investment & ROI</h2>
+        <div class="costs-grid" style="grid-template-columns: 1fr 1fr 1fr;">
             <div class="cost-section">
                 <div class="cost-title">Year 1 Investment</div>
                 <div class="cost-table">
@@ -462,6 +462,39 @@
                     <div style="font-size: 12px; color: #856404; margin-top: 5px;">Sizing context data required to realize £140k marketing uplift and £61k return prevention. Without it, current proven impact is agent capacity freed for complex issues.</div>
                 </div>
             </div>
+
+            <div class="cost-section">
+                <div class="cost-title">Phase 2: Marketing Integration</div>
+                <div class="cost-table">
+                    <div class="cost-row">
+                        <span class="cost-label">Google Ads integration</span>
+                        <span class="cost-value">£3,500</span>
+                    </div>
+                    <div class="cost-row">
+                        <span class="cost-label">Meta API setup</span>
+                        <span class="cost-value">£2,500</span>
+                    </div>
+                    <div class="cost-row">
+                        <span class="cost-label">Sizing data & tracking</span>
+                        <span class="cost-value">£5,000</span>
+                    </div>
+                    <div class="cost-row">
+                        <span class="cost-label">Testing & QA</span>
+                        <span class="cost-value">£2,500</span>
+                    </div>
+                    <div class="cost-row">
+                        <span class="cost-label">Documentation</span>
+                        <span class="cost-value">£1,500</span>
+                    </div>
+                    <div class="cost-row cost-total">
+                        <span class="cost-label">TOTAL (Phase 2)</span>
+                        <span class="cost-value">£15,000</span>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; font-size: 12px; color: #999;">
+                    Unlocks £140,180 marketing uplift
+                </div>
+            </div>
         </div>
     </div>
 
@@ -475,8 +508,6 @@
                 const response = await fetch('/api/metrics');
                 const metrics = await response.json();
 
-                const autoResRate = (metrics.auto_resolution_rate * 100).toFixed(0) + '%';
-                document.getElementById('autoResolutionRate').textContent = autoResRate;
                 document.getElementById('totalImpact').textContent = '£' + metrics.total_impact.toLocaleString();
                 document.getElementById('annualBenefit').textContent = '£' + metrics.total_impact.toLocaleString();
             } catch (error) {

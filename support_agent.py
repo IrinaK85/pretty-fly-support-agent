@@ -274,7 +274,7 @@ def generate_response(
     conversation: List[Message],
     new_message: str
 ) -> str:
-    """Generate Claude response with LTV-aware routing"""
+    """Generate Claude response with intelligent issue-based routing"""
 
     if not client:
         return "Support system not configured."
@@ -288,41 +288,46 @@ def generate_response(
         })
     messages.append({"role": "user", "content": new_message})
 
-    # Routing rules based on LTV tier
-    tier_info = LTV_TIERS[ticket_context.customer.ltv_tier]
+    # Determine routing based on issue type, not just customer value
+    category = ticket_context.category
 
-    if ticket_context.customer.ltv_tier == 'high':
-        routing = "AUTO-APPROVE returns within 30 days. Expedite everything. High priority."
-        tone = "VIP service - be especially helpful and warm"
-    elif ticket_context.customer.ltv_tier == 'medium':
-        routing = "Verify details first, then approve returns within 30 days. Standard service."
-        tone = "Helpful and professional"
+    if category == 'returns_exchanges':
+        routing = "AUTO-APPROVE returns/exchanges within 30 days (all customers). Process quickly and kindly."
+        tone = "Helpful and expedient"
+    elif category == 'product_quality':
+        routing = "ESCALATE quality/damage issues to human team. These need investigation and may indicate product defects."
+        tone = "Empathetic but escalate for investigation"
+    elif category == 'sizing_fit':
+        routing = "Provide detailed sizing guidance. Offer exchanges if sizing is our issue."
+        tone = "Helpful and informative"
     else:
-        routing = "For returns/quality issues, ask clarifying questions and escalate to human team for final decision."
-        tone = "Helpful but escalate complex issues"
+        routing = "Provide quick, helpful answer. Escalate only if complex or unusual."
+        tone = "Helpful and friendly"
 
-    # System prompt with tier-specific routing
+    # System prompt with issue-based routing
     system_prompt = f"""You are a support agent for Pretty Fly, a London streetwear brand.
 
-CUSTOMER PROFILE:
+CUSTOMER:
 - Name: {ticket_context.customer.name}
-- Lifetime Value: £{ticket_context.customer.ltv:.2f}
-- Customer Tier: {ticket_context.customer.ltv_tier.upper()}
+- LTV: £{ticket_context.customer.ltv:.2f}
 - Orders: {ticket_context.customer.order_count}
 
-ROUTING PRIORITY: {tier_info['priority']}
-HANDLING: {routing}
-TONE: {tone}
+ISSUE: {ticket_context.subject}
+CATEGORY: {category}
 
-TICKET DETAILS:
-- Issue: {ticket_context.subject}
-- Category: {ticket_context.category}
+ROUTING LOGIC:
+{routing}
+
+TONE: {tone}
 
 Response guidelines:
 - Be concise (2-3 sentences)
-- For returns/quality: Follow the routing rules above (high-value auto-approve, low-value escalate)
-- Show empathy and understanding
-- If escalating: "I'll have my team review this personally and get back to you within 24 hours."
+- For returns within 30 days: Auto-approve immediately (any customer)
+- For quality issues: Express concern, gather details, escalate for investigation
+- For sizing: Provide guidance, offer exchange
+- Be warm and helpful - good service builds loyalty
+
+If escalating: "I'm escalating this to our team for urgent review. You'll hear from us within 24 hours."
 """
 
     try:

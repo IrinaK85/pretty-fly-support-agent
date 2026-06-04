@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pretty Fly Marketing Amplification</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Pretty Fly Support — Marketing</title>
     <style>
         * {
             margin: 0;
@@ -50,7 +49,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -59,7 +58,8 @@
             margin-top: 40px;
             margin-bottom: 20px;
             color: #333;
-            font-size: 22px;
+            font-size: 20px;
+            font-weight: 600;
         }
 
         .impact-summary {
@@ -86,183 +86,7 @@
         .impact-detail {
             font-size: 16px;
             opacity: 0.9;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .metric-card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
-        }
-
-        .metric-label {
-            font-size: 13px;
-            color: #999;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
             margin-bottom: 5px;
-        }
-
-        .metric-detail {
-            font-size: 13px;
-            color: #666;
-        }
-
-        .metric-card.google {
-            border-left-color: #ea4335;
-        }
-
-        .metric-card.meta {
-            border-left-color: #1877f2;
-        }
-
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .channel-card {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-top: 4px solid;
-        }
-
-        .channel-card.google {
-            border-top-color: #ea4335;
-        }
-
-        .channel-card.meta {
-            border-top-color: #1877f2;
-        }
-
-        .channel-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-
-        .metric-row:last-child {
-            border-bottom: none;
-        }
-
-        .metric-row-label {
-            color: #666;
-        }
-
-        .metric-row-value {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .chart-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .uplift-section {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 40px;
-        }
-
-        .uplift-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .uplift-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .uplift-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .uplift-channel {
-            font-weight: 600;
-            margin-bottom: 12px;
-            font-size: 15px;
-        }
-
-        .uplift-channel.google {
-            color: #ea4335;
-        }
-
-        .uplift-channel.meta {
-            color: #1877f2;
-        }
-
-        .uplift-stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .uplift-stat:last-child {
-            border-bottom: none;
-        }
-
-        .uplift-label {
-            color: #666;
-        }
-
-        .uplift-value {
-            font-weight: 600;
-            color: #333;
         }
 
         .key-insight {
@@ -282,6 +106,295 @@
         .insight-text {
             color: #333;
             line-height: 1.6;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        th {
+            background: #f9f9f9;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .highlight {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .simulation-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .simulation-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .simulation-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .product-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .product-detail {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .add-to-cart {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            position: relative;
+        }
+
+        .add-to-cart:hover {
+            background: #5568d3;
+        }
+
+        .success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #27ae60;
+            border-radius: 6px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .chat-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            max-height: 300px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.bot {
+            align-items: flex-start;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message-bubble {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 90%;
+        }
+
+        .message.bot .message-bubble {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+        }
+
+        .replay-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .replay-btn:hover {
+            background: #5568d3;
+        }
+
+        .simulation-summary {
+            background: #f0fdf4;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        .uplift-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .uplift-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-top: 4px solid;
+        }
+
+        .uplift-card.google {
+            border-top-color: #ea4335;
+        }
+
+        .uplift-card.meta {
+            border-top-color: #1877f2;
+        }
+
+        .uplift-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .uplift-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .uplift-stat:last-child {
+            border-bottom: none;
+        }
+
+        .uplift-label {
+            color: #666;
+        }
+
+        .uplift-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .warning-box {
+            background: #fef3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 40px;
+            font-size: 13px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .warning-text {
+            color: #856404;
+            line-height: 1.5;
         }
 
         footer {
@@ -295,260 +408,193 @@
 </head>
 <body>
     <div class="header">
-        <h1>🎀 Pretty Fly Marketing Amplification</h1>
+        <h1>🎀 Pretty Fly Support</h1>
         <div class="header-links">
-            <a href="/" class="header-link">← Conversations</a>
-            <a href="/metrics" class="header-link">📊 Metrics</a>
+            <a href="/" class="header-link">📊 Dashboard</a>
+            <a href="/conversations" class="header-link">Conversations</a>
+            <a href="/marketing" class="header-link">📈 Marketing</a>
         </div>
     </div>
 
     <div class="container">
         <div class="impact-summary">
-            <div class="impact-title">Additional Revenue from Proactive Support</div>
+            <div class="impact-title">Additional Annual Revenue</div>
             <div class="impact-value">£140,180</div>
-            <div class="impact-detail">10% conversion uplift across paid channels (24-month period)</div>
+            <div class="impact-detail">10% conversion uplift across paid channels</div>
+            <div class="impact-detail" style="margin-top: 10px; color: #ffeaa7; font-weight: 600;">⚠️ Requires product sizing context data to unlock</div>
         </div>
 
         <div class="key-insight">
             <div class="insight-title">💡 Key Insight</div>
             <div class="insight-text">
-                Google Ads significantly outperforms Meta: 3.23x ROAS vs 2.21x (46% better), with 30% lower customer acquisition cost (£40.98 vs £58.45). Proactive support that answers sizing questions during checkout reduces purchase abandonment and increases conversion rate by 10% on both channels.
+                Google Ads significantly outperforms Meta: 3.23x ROAS vs 2.21x (46% better), with 30% lower customer acquisition cost (£40.98 vs £58.45). Proactive support that answers sizing questions at checkout reduces cart abandonment — but requires product measurements and customer body data integration.
             </div>
         </div>
 
-        <h2>Channel Performance Comparison</h2>
-        <div class="comparison-grid">
-            <div class="channel-card google">
-                <div class="channel-title">📍 Google Ads</div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Total Orders (24m)</span>
-                    <span class="metric-row-value">12,343</span>
+        <h2>Channel Performance</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Google Ads</th>
+                    <th>Meta Ads</th>
+                    <th>Combined</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Annual Orders</td>
+                    <td>6,172</td>
+                    <td>4,523</td>
+                    <td>10,695</td>
+                </tr>
+                <tr>
+                    <td>Annual Spend</td>
+                    <td>£252,883</td>
+                    <td>£264,359</td>
+                    <td>£517,241</td>
+                </tr>
+                <tr>
+                    <td>Annual Revenue</td>
+                    <td>£816,851</td>
+                    <td>£584,954</td>
+                    <td>£1,401,805</td>
+                </tr>
+                <tr>
+                    <td>ROAS</td>
+                    <td><span class="highlight">3.23x ↑</span></td>
+                    <td>2.21x</td>
+                    <td>2.71x</td>
+                </tr>
+                <tr>
+                    <td>Customer Acquisition Cost</td>
+                    <td><span class="highlight">£40.98</span></td>
+                    <td>£58.45</td>
+                    <td>£48.35</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 12px; color: #999; margin-bottom: 40px;">Google outperforms Meta by 46% on ROAS and has 30% lower CAC, making it the most efficient channel.</p>
+
+        <h2>Live Simulation: How Sizing Support Prevents Abandonment</h2>
+        <div class="simulation-section">
+            <div class="simulation-title">See how Claude reduces checkout abandonment</div>
+            <div class="simulation-container">
+                <div class="product-panel">
+                    <div class="product-name">Essential Tee</div>
+                    <div class="product-price">£45</div>
+                    <div class="product-detail">100% Cotton • Relaxed Fit • Unisex</div>
+                    <div class="product-detail">Size: <strong>M (42" chest)</strong></div>
+                    <button class="add-to-cart" onclick="runSimulation()">
+                        Add to Cart
+                        <div class="success-overlay" id="successOverlay">✓ Conversion saved!</div>
+                    </button>
                 </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Total Spend (24m)</span>
-                    <span class="metric-row-value">£505,765</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Revenue Generated</span>
-                    <span class="metric-row-value">£1,633,702</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">ROAS</span>
-                    <span class="metric-row-value" style="color: #27ae60;">3.23x ↑</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">CAC</span>
-                    <span class="metric-row-value" style="color: #27ae60;">£40.98</span>
+
+                <div class="chat-panel">
+                    <div class="chat-header">💬 Sizing Help</div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <button class="replay-btn" onclick="runSimulation()">▶ Replay Simulation</button>
                 </div>
             </div>
 
-            <div class="channel-card meta">
-                <div class="channel-title">📌 Meta/Facebook Ads</div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Total Orders (24m)</span>
-                    <span class="metric-row-value">9,045</span>
+            <div class="simulation-summary" id="simulationSummary" style="display: none;">
+                <div class="summary-row">
+                    <span class="summary-label">Without Claude:</span>
+                    <span class="summary-value">Cart abandoned (-£45)</span>
                 </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Total Spend (24m)</span>
-                    <span class="metric-row-value">£528,717</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">Revenue Generated</span>
-                    <span class="metric-row-value">£1,169,907</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">ROAS</span>
-                    <span class="metric-row-value">2.21x</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-row-label">CAC</span>
-                    <span class="metric-row-value">£58.45</span>
-                </div>
-            </div>
-        </div>
-
-        <h2>Impact Breakdown</h2>
-        <div class="charts-grid">
-            <div class="chart-container">
-                <div class="chart-title">Revenue by Channel (24 months)</div>
-                <canvas id="revenueChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <div class="chart-title">ROAS Comparison (Higher is Better)</div>
-                <canvas id="roasChart"></canvas>
-            </div>
-        </div>
-
-        <h2>10% Conversion Uplift Impact</h2>
-        <div class="uplift-section">
-            <div class="uplift-title">How Proactive Support Increases Conversions</div>
-            <div style="margin-bottom: 30px;">
-                <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-                    <strong>The Problem:</strong> 23-45% of e-commerce visitors abandon their cart due to sizing anxiety. Answering "Will this fit?" at checkout increases confidence and converts hesitant buyers.
-                </p>
-                <p style="color: #666; line-height: 1.6;">
-                    <strong>The Solution:</strong> Proactive Claude support with instant sizing guidance, fit recommendations, and sizing history for returning customers reduces abandonment and increases AOV for size-uncertain purchases.
-                </p>
-            </div>
-
-            <div class="uplift-grid">
-                <div class="uplift-item">
-                    <div class="uplift-channel google">🔴 Google Ads (10% Uplift)</div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Current annual conversions</span>
-                        <span class="uplift-value">6,172</span>
-                    </div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Extra conversions (10%)</span>
-                        <span class="uplift-value">617</span>
-                    </div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Avg customer spend</span>
-                        <span class="uplift-value">£132.36</span>
-                    </div>
-                    <div class="uplift-stat" style="border-bottom: 2px solid #ea4335 !important; padding-bottom: 12px; margin-top: 8px;">
-                        <span class="uplift-label" style="font-weight: 600; color: #ea4335;">Annual impact</span>
-                        <span class="uplift-value" style="color: #ea4335; font-size: 18px;">£81,685</span>
-                    </div>
-                </div>
-
-                <div class="uplift-item">
-                    <div class="uplift-channel meta">🔵 Meta Ads (10% Uplift)</div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Current annual conversions</span>
-                        <span class="uplift-value">4,522</span>
-                    </div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Extra conversions (10%)</span>
-                        <span class="uplift-value">452</span>
-                    </div>
-                    <div class="uplift-stat">
-                        <span class="uplift-label">Avg customer spend</span>
-                        <span class="uplift-value">£129.34</span>
-                    </div>
-                    <div class="uplift-stat" style="border-bottom: 2px solid #1877f2 !important; padding-bottom: 12px; margin-top: 8px;">
-                        <span class="uplift-label" style="font-weight: 600; color: #1877f2;">Annual impact</span>
-                        <span class="uplift-value" style="color: #1877f2; font-size: 18px;">£58,495</span>
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                <div style="text-align: center;">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;">COMBINED ANNUAL REVENUE UPLIFT</div>
-                    <div style="font-size: 36px; font-weight: 700; color: #27ae60;">£140,180</div>
+                <div class="summary-row">
+                    <span class="summary-label">With Claude:</span>
+                    <span class="summary-value">Purchase completed (+£45)</span>
                 </div>
             </div>
         </div>
 
-        <h2>Proactive Support Tactics</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;">
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">1. Checkout Support</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">"Need sizing help?" button on product pages. Claude answers fit questions in real-time before purchase.</div>
+        <h2>Annual Uplift Impact</h2>
+        <div class="uplift-cards">
+            <div class="uplift-card google">
+                <div class="uplift-title">🔴 Google Ads (10% Uplift)</div>
+                <div class="uplift-stat">
+                    <span class="uplift-label">Additional conversions</span>
+                    <span class="uplift-value">617</span>
+                </div>
+                <div class="uplift-stat">
+                    <span class="uplift-label">Avg customer spend</span>
+                    <span class="uplift-value">£132.36</span>
+                </div>
+                <div class="uplift-stat" style="border-top: 2px solid #ea4335; margin-top: 8px; padding-top: 8px;">
+                    <span class="uplift-label" style="font-weight: 600;">Annual impact</span>
+                    <span class="uplift-value" style="font-size: 16px; color: #ea4335;">£81,685</span>
+                </div>
             </div>
 
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">2. Post-Purchase Guidance</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">Day 1: Delivery ETA. Day 7: Care tips. Day 14: "How's it fitting?" with upsell guidance for customers who size up/down.</div>
-            </div>
-
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">3. Marketing Integration</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">"Free sizing consultation" offer in ad copy. Reduces friction for size-conscious buyers, increases ROAS.</div>
-            </div>
-
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">4. Returning Customer Memory</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">Claude remembers: "You usually size down" or "This fits oversized". Increases repeat purchase confidence.</div>
-            </div>
-
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">5. Live Chat</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">AI-powered live chat on checkout. Catches abandonment moments. Handles 76% autonomously, escalates complex questions.</div>
-            </div>
-
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">6. Feedback Loop</div>
-                <div style="font-size: 14px; color: #666; line-height: 1.6;">Claude learns from returns data: Which fit comments lead to happy returns? Updates guidance continuously.</div>
+            <div class="uplift-card meta">
+                <div class="uplift-title">🔵 Meta Ads (10% Uplift)</div>
+                <div class="uplift-stat">
+                    <span class="uplift-label">Additional conversions</span>
+                    <span class="uplift-value">452</span>
+                </div>
+                <div class="uplift-stat">
+                    <span class="uplift-label">Avg customer spend</span>
+                    <span class="uplift-value">£129.34</span>
+                </div>
+                <div class="uplift-stat" style="border-top: 2px solid #1877f2; margin-top: 8px; padding-top: 8px;">
+                    <span class="uplift-label" style="font-weight: 600;">Annual impact</span>
+                    <span class="uplift-value" style="font-size: 16px; color: #1877f2;">£58,495</span>
+                </div>
             </div>
         </div>
 
+        <div class="warning-box">
+            <div class="warning-title">⚠️ Data Requirement Notice</div>
+            <div class="warning-text">
+                The 10% uplift and £140,180 annual impact require integrating product sizing data (measurements, materials, fit) and customer body data (height, preferred sizes). Without this data, Claude can only provide generic sizing guidance. Phase 1 implementation of sizing context is critical to unlock this revenue opportunity.
+            </div>
+        </div>
     </div>
 
     <footer>
-        <p>Based on real Pretty Fly data analysis. Marketing uplift calculated from 24 months of order data, customer segmentation, and channel performance metrics.</p>
+        <p>Based on real Pretty Fly data analysis. Channel performance calculated from 24 months of order and ad spend data.</p>
     </footer>
 
     <script>
-        // Revenue chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(revenueCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Google Ads', 'Meta Ads'],
-                datasets: [{
-                    label: 'Revenue Generated (24m)',
-                    data: [1633702, 1169907],
-                    backgroundColor: ['#ea4335', '#1877f2'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '£' + (value / 1000).toFixed(0) + 'k';
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        function runSimulation() {
+            const chatMessages = document.getElementById('chatMessages');
+            const successOverlay = document.getElementById('successOverlay');
+            const simulationSummary = document.getElementById('simulationSummary');
 
-        // ROAS chart
-        const roasCtx = document.getElementById('roasChart').getContext('2d');
-        new Chart(roasCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Google Ads', 'Meta Ads'],
-                datasets: [{
-                    label: 'ROAS (Return on Ad Spend)',
-                    data: [3.23, 2.21],
-                    backgroundColor: ['#27ae60', '#f39c12'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
+            chatMessages.innerHTML = '';
+            successOverlay.style.display = 'none';
+            simulationSummary.style.display = 'none';
+
+            const messages = [
+                { type: 'bot', text: "Need help finding your size? 👋" },
+                { type: 'user', text: "I'm usually between S and M, which should I pick?" },
+                { type: 'bot', text: "Great question! Our Essential Tee has a relaxed fit — the M measures 42\" chest. If you're between sizes, I'd recommend M. Most customers who sized up loved the fit!" }
+            ];
+
+            let delay = 0;
+            messages.forEach((msg, idx) => {
+                setTimeout(() => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `message ${msg.type}`;
+                    msgDiv.innerHTML = `<div class="message-bubble">${msg.text}</div>`;
+                    chatMessages.appendChild(msgDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                    if (idx === messages.length - 1) {
+                        setTimeout(() => {
+                            successOverlay.style.display = 'flex';
+                            simulationSummary.style.display = 'block';
+                        }, 500);
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 4,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(1) + 'x';
-                            }
-                        }
-                    }
-                }
-            }
-        });
+                }, delay);
+                delay += 800;
+            });
+        }
+
+        // Auto-run on load
+        setTimeout(runSimulation, 500);
     </script>
 </body>
 </html>

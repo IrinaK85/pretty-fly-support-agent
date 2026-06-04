@@ -22,14 +22,21 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    """Main dashboard page"""
+    """Dashboard page (landing page)"""
+    return render_template('metrics.html')
+
+
+@app.route('/conversations')
+def conversations_page():
+    """Conversations/support tickets page"""
     return render_template('dashboard.html')
 
 
 @app.route('/metrics')
-def metrics_page():
-    """Metrics dashboard page"""
-    return render_template('metrics.html')
+def metrics_redirect():
+    """Redirect to dashboard for backwards compatibility"""
+    from flask import redirect
+    return redirect('/')
 
 
 @app.route('/marketing')

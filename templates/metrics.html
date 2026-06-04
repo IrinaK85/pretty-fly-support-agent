@@ -302,8 +302,8 @@
         <div class="metrics-grid">
             <div class="metric-card high">
                 <div class="metric-label">Auto-Resolution Rate</div>
-                <div class="metric-value">76%</div>
-                <div class="metric-detail">Up from 40% with manual triage</div>
+                <div class="metric-value" id="autoResolutionRate">-</div>
+                <div class="metric-detail">Returns, sizing, orders, codes (no escalation)</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Support Hours Saved</div>
@@ -518,6 +518,10 @@
                 document.getElementById('sampleHighTickets').textContent = metrics.high_value_tickets;
                 document.getElementById('sampleMediumTickets').textContent = metrics.medium_value_tickets;
                 document.getElementById('sampleLowTickets').textContent = metrics.low_value_tickets;
+
+                // Update auto-resolution rate
+                const autoResRate = (metrics.auto_resolution_rate * 100).toFixed(0) + '%';
+                document.getElementById('autoResolutionRate').textContent = autoResRate;
 
                 // Impact chart
                 const impactCtx = document.getElementById('impactChart').getContext('2d');

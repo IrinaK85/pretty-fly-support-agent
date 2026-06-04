@@ -391,6 +391,12 @@ def get_metrics() -> dict:
     medium_ltv = tickets_with_ltv[(tickets_with_ltv['ltv'] >= 150) & (tickets_with_ltv['ltv'] <= 300)]
     low_ltv = tickets_with_ltv[tickets_with_ltv['ltv'] < 150]
 
+    # Calculate auto-resolution rate based on categories
+    auto_resolvable = tickets_df[tickets_df['category'].isin([
+        'returns_exchanges', 'sizing_fit', 'order_status', 'discount_code'
+    ])]
+    auto_resolution_rate = len(auto_resolvable) / len(tickets_df) if len(tickets_df) > 0 else 0
+
     return {
         'total_tickets': len(tickets_df),
         'high_value_tickets': len(high_ltv),
@@ -399,7 +405,7 @@ def get_metrics() -> dict:
         'high_value_customers': high_ltv['customer_id'].nunique(),
         'medium_value_customers': medium_ltv['customer_id'].nunique(),
         'low_value_customers': low_ltv['customer_id'].nunique(),
-        'auto_resolution_rate': 0.76,
+        'auto_resolution_rate': round(auto_resolution_rate, 2),
         'time_saved_hours': 965,
         'cost_savings': 24126,
         'refund_reduction': 61138,

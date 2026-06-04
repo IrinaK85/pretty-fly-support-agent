@@ -32,6 +32,12 @@ def metrics_page():
     return render_template('metrics.html')
 
 
+@app.route('/marketing')
+def marketing_page():
+    """Marketing amplification page"""
+    return render_template('marketing.html')
+
+
 @app.route('/api/tickets', methods=['GET'])
 def list_tickets():
     """Get list of support tickets"""

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pretty Fly Support Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+            --accent: #000;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: var(--white);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--white);
+            padding: 48px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            margin: 48px 0 60px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: var(--accent);
+            color: var(--white);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .sample-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 24px;
+        }
+
+        .sample-item {
+            padding: 14px 16px;
+            background: var(--light-gray);
+            border-left: 3px solid var(--gray);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .sample-item:hover {
+            background: var(--gray);
+            border-left-color: var(--accent);
+        }
+
+        .sample-item.selected {
+            background: var(--accent);
+            border-left-color: var(--accent);
+            color: var(--white);
+        }
+
+        .sample-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .sample-item-meta {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .sample-item.selected .sample-item-meta {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .result {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .result-value {
+            padding: 12px 14px;
+            background: var(--white);
+            border-radius: 6px;
+            border-left: 4px solid var(--dark-gray);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .result-value em {
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        .decision-auto {
+            border-left-color: var(--success);
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+        }
+
+        .decision-verify {
+            border-left-color: var(--warning);
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
+        }
+
+        .decision-escalate {
+            border-left-color: var(--danger);
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.05), transparent);
+        }
+
+        .priority-high {
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .priority-normal {
+            color: var(--text-light);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            border: 3px solid var(--gray);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            padding: 14px 16px;
+            border-radius: 6px;
+            border-left: 4px solid var(--danger);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .section h2 {
+                font-size: 18px;
+            }
+        }
+
+        .sample-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sample-list::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        .sample-list::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: 3px;
+        }
+
+        .sample-list::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-gray);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Pretty Fly Support Agent</h1>
+            <p class="subtitle">Cohort-aware intelligent ticket routing</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <!-- Input Panel -->
+            <div class="section">
+                <h2>Support Ticket</h2>
+
+                <label>Sample Tickets</label>
+                <div class="sample-list" id="sampleList"></div>
+
+                <h3 style="font-size: 14px; font-weight: 600; margin: 28px 0 16px; color: var(--text-dark);">Or Enter Your Own</h3>
+
+                <div class="form-group">
+                    <label>Customer ID</label>
+                    <input type="text" id="customerId" placeholder="cust_..." />
+                </div>
+
+                <div class="form-group">
+                    <label>Order ID</label>
+                    <input type="text" id="orderId" placeholder="ord_..." />
+                </div>
+
+                <div class="form-group">
+                    <label>Product ID</label>
+                    <input type="text" id="productId" placeholder="prod_..." />
+                </div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="subject" placeholder="E.g., Want to return item" />
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="body" placeholder="Customer message..."></textarea>
+                </div>
+
+                <button onclick="processTicket()">Process Ticket</button>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="section">
+                <h2>Agent Response</h2>
+                <div id="results">
+                    <div style="color: var(--text-light); text-align: center; padding: 40px 20px;">
+                        Select a sample ticket or enter your own to see the agent's response
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadSampleTickets() {
+            const response = await fetch('/api/sample_tickets');
+            const tickets = await response.json();
+
+            const list = document.getElementById('sampleList');
+            list.innerHTML = tickets.map((t, i) => `
+                <div class="sample-item" onclick="selectSample(this, ${JSON.stringify(t).replace(/"/g, '&quot;')})">
+                    <div class="sample-item-title">${t.subject}</div>
+                    <div class="sample-item-meta">${t.customer_gender} • ${t.category.replace(/_/g, ' ')}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectSample(element, ticket) {
+            document.querySelectorAll('.sample-item').forEach(e => e.classList.remove('selected'));
+            element.classList.add('selected');
+
+            document.getElementById('customerId').value = ticket.customer_id;
+            document.getElementById('orderId').value = ticket.order_id || '';
+            document.getElementById('productId').value = ticket.product_id || '';
+            document.getElementById('subject').value = ticket.subject;
+            document.getElementById('body').value = 'I have an issue with my recent order.';
+        }
+
+        async function processTicket() {
+            const customerId = document.getElementById('customerId').value;
+            const subject = document.getElementById('subject').value;
+
+            if (!customerId || !subject) {
+                alert('Please provide Customer ID and Subject');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Processing...</div></div>';
+
+            try {
+                const response = await fetch('/api/process_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticket_id: 'demo_' + Date.now(),
+                        customer_id: document.getElementById('customerId').value,
+                        order_id: document.getElementById('orderId').value,
+                        product_id: document.getElementById('productId').value,
+                        subject: subject,
+                        body: document.getElementById('body').value
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    resultsDiv.innerHTML = `<div class="error">${result.error}</div>`;
+                    return;
+                }
+
+                const decisionClass = {
+                    'auto_process_return': 'decision-auto',
+                    'verify_then_process': 'decision-verify',
+                    'escalate_to_human': 'decision-escalate',
+                    'provide_guidance': 'decision-auto',
+                    'verify_and_apply': 'decision-verify',
+                    'investigate_and_respond': 'decision-auto'
+                }[result.automation_decision] || '';
+
+                const priorityClass = result.priority === 'high' ? 'priority-high' : 'priority-normal';
+
+                resultsDiv.innerHTML = `
+                    <div class="result">
+                        <div class="result-item">
+                            <div class="result-label">Category</div>
+                            <div class="result-value">${result.category.replace(/_/g, ' ')}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-label">Customer Cohort</div>
+                            <div class="result-value">${result.customer_cohort}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-label">Lifetime Value</div>
+                            <div class="result-value">£${result.customer_ltv.toFixed(2)}</div>
+                        </div>
+
+                        <div class="result-item" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--gray);">
+                            <div class="result-label">Automation Decision</div>
+                            <div class="result-value ${decisionClass}">${result.automation_decision.replace(/_/g, ' ').toUpperCase()}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-label">Priority</div>
+                            <div class="result-value ${priorityClass}">${result.priority.toUpperCase()}</div>
+                        </div>
+
+                        <div class="result-item">
+                            <div class="result-label">Why</div>
+                            <div class="result-value">${result.automation_reasoning}</div>
+                        </div>
+
+                        <div class="result-item" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--gray);">
+                            <div class="result-label">Agent Response</div>
+                            <div class="result-value" style="border-left-color: var(--text-light); font-style: italic;">
+                                "${result.agent_response}"
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        loadSampleTickets();
+    </script>
+</body>
+</html>

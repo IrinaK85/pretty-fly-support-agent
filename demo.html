@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pretty Fly Support Agent - Interactive Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+            --accent: #000;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: var(--white);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--white);
+            padding: 40px 0;
+            border-bottom: 1px solid var(--gray);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            border-bottom: 2px solid var(--gray);
+        }
+
+        .tab-button {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-button:hover {
+            color: var(--text-dark);
+        }
+
+        .content {
+            margin: 48px 0 60px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Scenario Comparison */
+        .comparison-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .scenario-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .scenario-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--gray);
+            background: var(--white);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .scenario-btn:hover {
+            border-color: var(--accent);
+            background: var(--light-gray);
+        }
+
+        .scenario-btn.active {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .comparison-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 28px;
+            border: 1px solid var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card.high-value {
+            border-left: 5px solid var(--success);
+        }
+
+        .comparison-card.mid-value {
+            border-left: 5px solid var(--warning);
+        }
+
+        .customer-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-high-value {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge-mid-value {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .comparison-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .info-block {
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .decision-box {
+            background: var(--white);
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 12px;
+            border-left: 4px solid var(--gray);
+            animation: slideIn 0.5s ease;
+        }
+
+        .decision-box.auto {
+            border-left-color: var(--success);
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);
+        }
+
+        .decision-box.verify {
+            border-left-color: var(--warning);
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.05), transparent);
+        }
+
+        .decision-box.escalate {
+            border-left-color: var(--danger);
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.05), transparent);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .decision-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .decision-action {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .decision-reasoning {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .agent-response {
+            background: var(--white);
+            border-radius: 6px;
+            padding: 14px;
+            font-style: italic;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 16px;
+            border-left: 4px solid var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Try Your Own */
+        .form-section {
+            max-width: 700px;
+            background: var(--light-gray);
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--gray);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: var(--accent);
+            color: var(--white);
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-result {
+            margin-top: 32px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .priority-high {
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .priority-normal {
+            color: var(--text-light);
+        }
+
+        .insight {
+            background: var(--light-gray);
+            border-left: 4px solid var(--accent);
+            padding: 24px;
+            margin-top: 48px;
+            border-radius: 6px;
+        }
+
+        .insight h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .insight p {
+            color: var(--text-light);
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .comparison-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Pretty Fly Support Agent</h1>
+            <p class="subtitle">Interactive Demo: Cohort-Aware Ticket Routing</p>
+
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('comparison')">Comparison</button>
+                <button class="tab-button" onclick="switchTab('try-own')">Try Your Own</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Comparison View -->
+        <div id="comparison-tab" class="content">
+            <div class="comparison-header">
+                <div>
+                    <label style="margin-bottom: 12px; display: block;">Select Scenario</label>
+                    <div class="scenario-selector">
+                        <button class="scenario-btn active" onclick="loadScenario(0)">Returns</button>
+                        <button class="scenario-btn" onclick="loadScenario(1)">Sizing</button>
+                        <button class="scenario-btn" onclick="loadScenario(2)">Order Status</button>
+                        <button class="scenario-btn" onclick="loadScenario(3)">Discount Code</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison" id="comparison-content"></div>
+        </div>
+
+        <!-- Try Your Own View -->
+        <div id="try-own-tab" class="content hidden">
+            <div class="form-section">
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--text-dark);">Submit a Custom Ticket</h2>
+
+                <div class="form-group">
+                    <label>Customer ID</label>
+                    <input type="text" id="customerId" placeholder="E.g., cust_000001" onblur="lookupCustomer()" />
+                </div>
+
+                <div id="customerInfo" class="hidden">
+                    <div class="form-group">
+                        <label>Customer Segment</label>
+                        <div style="padding: 10px 14px; background: var(--white); border-radius: 6px; border: 1px solid var(--gray); font-size: 14px;" id="segmentDisplay"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lifetime Value</label>
+                        <div style="padding: 10px 14px; background: var(--white); border-radius: 6px; border: 1px solid var(--gray); font-size: 14px;" id="ltvDisplay"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cohort</label>
+                        <div style="padding: 10px 14px; background: var(--white); border-radius: 6px; border: 1px solid var(--gray); font-size: 14px;" id="cohortDisplay"></div>
+                    </div>
+                </div>
+
+                <div id="customerError" class="hidden" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 12px 14px; border-radius: 6px; border-left: 4px solid var(--danger); font-size: 13px; margin-bottom: 16px;"></div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="ticketSubject" placeholder="E.g., Need to return item" />
+                </div>
+
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="ticketBody" placeholder="Customer message..."></textarea>
+                </div>
+
+                <button onclick="processCustomTicket()" id="submitBtn">Process Ticket</button>
+
+                <div id="customResult" class="form-result hidden"></div>
+            </div>
+        </div>
+
+        <div class="insight">
+            <h2>🎯 Key Insight</h2>
+            <p>
+                <strong>Same issue, different customer, different response.</strong><br><br>
+                High-value customers get instant auto-resolution to preserve loyalty.<br>
+                Mid-value customers get verification to understand behavior.<br><br>
+                Most support agents treat all customers the same.<br>
+                This agent optimizes for business outcome: protect & grow customer lifetime value.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Sample customer database (from pretty_fly.db)
+        const sampleCustomers = [
+            { id: 'cust_000001', segment: 'womens', ltv: 847.50, cohort: 'Apr 2024', orders: 4 },
+            { id: 'cust_000002', segment: 'mens', ltv: 156.20, cohort: 'Jan 2025', orders: 2 },
+            { id: 'cust_000003', segment: 'womens', ltv: 612.80, cohort: 'Jun 2024', orders: 3 },
+            { id: 'cust_000004', segment: 'mens', ltv: 234.50, cohort: 'Aug 2024', orders: 3 },
+            { id: 'cust_000005', segment: 'womens', ltv: 734.20, cohort: 'May 2024', orders: 4 },
+            { id: 'cust_000006', segment: 'mens', ltv: 189.75, cohort: 'Nov 2024', orders: 2 },
+            { id: 'cust_000007', segment: 'womens', ltv: 945.00, cohort: 'Mar 2024', orders: 5 },
+            { id: 'cust_000008', segment: 'mens', ltv: 198.30, cohort: 'Dec 2024', orders: 2 },
+            { id: 'cust_000009', segment: 'womens', ltv: 567.40, cohort: 'Jul 2024', orders: 3 },
+            { id: 'cust_000010', segment: 'mens', ltv: 234.80, cohort: 'Feb 2025', orders: 2 },
+        ];
+
+        const scenarios = [
+            {
+                name: "Returns & Exchanges",
+                highValue: {
+                    title: "High-Value Womens Customer",
+                    badge: "High Value",
+                    badgeClass: "badge-high-value",
+                    segment: "Womens",
+                    ltv: "£847.50",
+                    cohort: "Apr 2024",
+                    orders: "4 orders",
+                    subject: "Need to return Womens Relaxed Hoodie",
+                    body: "Got this item but it's not quite right. Can I return it?",
+                    decision: "auto_process_return",
+                    decisionText: "AUTO-PROCESS RETURN",
+                    priority: "high",
+                    reasoning: "High-value customer (womens cohort, LTV £847). Within return window. Auto-process to preserve loyalty.",
+                    response: "Got it! We'll process your Womens Relaxed Hoodie return right away. A return label is on its way to your email. Once we receive it back, we'll refund you within 5 business days. Thank you!"
+                },
+                midValue: {
+                    title: "Mid-Value Mens Customer",
+                    badge: "Mid Value",
+                    badgeClass: "badge-mid-value",
+                    segment: "Mens",
+                    ltv: "£156.20",
+                    cohort: "Jan 2025",
+                    orders: "2 orders",
+                    subject: "Want to return Classic T-Shirt",
+                    body: "Got this item but it's not quite right. Can I return it?",
+                    decision: "verify_then_process",
+                    decisionText: "VERIFY THEN PROCESS",
+                    priority: "normal",
+                    reasoning: "Eligible for return. Ask for brief reason before processing.",
+                    response: "Thanks for getting in touch! We can definitely help with that return. Just so we can improve: what didn't quite work with the Classic T-Shirt? Once we hear back, we'll send a return label right away."
+                }
+            },
+            {
+                name: "Sizing & Fit",
+                highValue: {
+                    title: "Womens Customer (Sizing)",
+                    badge: "High Value",
+                    badgeClass: "badge-high-value",
+                    segment: "Womens",
+                    ltv: "£612.80",
+                    cohort: "Jun 2024",
+                    orders: "3 orders",
+                    subject: "Is the Classic Oversized Hoodie true to size?",
+                    body: "Is this product true to size? I usually wear medium.",
+                    decision: "provide_guidance",
+                    decisionText: "PROVIDE GUIDANCE",
+                    priority: "high",
+                    reasoning: "Provide sizing guidance. High value—prioritize answer quality.",
+                    response: "The Classic Oversized Hoodie runs true to size with a relaxed fit. Medium would give you that comfortable oversized look. Feel free to reach out after it arrives if you'd like to exchange!"
+                },
+                midValue: {
+                    title: "Mens Customer (Sizing)",
+                    badge: "Mid Value",
+                    badgeClass: "badge-mid-value",
+                    segment: "Mens",
+                    ltv: "£234.50",
+                    cohort: "Aug 2024",
+                    orders: "3 orders",
+                    subject: "Does the Classic T-Shirt fit large?",
+                    body: "Is this product true to size? I usually wear medium.",
+                    decision: "provide_guidance",
+                    decisionText: "PROVIDE GUIDANCE",
+                    priority: "normal",
+                    reasoning: "Provide sizing guidance.",
+                    response: "The Classic T-Shirt runs true to size. If you usually wear medium, go with medium. Let us know if you need to exchange after it arrives!"
+                }
+            },
+            {
+                name: "Order Status",
+                highValue: {
+                    title: "High-Value Customer (Late Order)",
+                    badge: "High Value",
+                    badgeClass: "badge-high-value",
+                    segment: "Womens",
+                    ltv: "£945.00",
+                    cohort: "Mar 2024",
+                    orders: "5 orders",
+                    subject: "My tracking hasn't updated",
+                    body: "My tracking hasn't updated in a week. When will my order arrive?",
+                    decision: "investigate_and_respond",
+                    decisionText: "INVESTIGATE & RESPOND",
+                    priority: "high",
+                    reasoning: "High-value customer with old order. Investigate tracking immediately.",
+                    response: "Let me look into this right away. I'm checking with our fulfillment team on the tracking status. You should hear back from us within 2 hours with an update and a solution. Thank you for your patience!"
+                },
+                midValue: {
+                    title: "Mid-Value Customer (Late Order)",
+                    badge: "Mid Value",
+                    badgeClass: "badge-mid-value",
+                    segment: "Mens",
+                    ltv: "£189.75",
+                    cohort: "Nov 2024",
+                    orders: "2 orders",
+                    subject: "Where's my order?",
+                    body: "My tracking hasn't updated in a week. When will my order arrive?",
+                    decision: "investigate_and_respond",
+                    decisionText: "INVESTIGATE & RESPOND",
+                    priority: "normal",
+                    reasoning: "Order delayed. Standard investigation.",
+                    response: "Let me look into this for you. I'm checking on your tracking and will get back to you shortly with an update."
+                }
+            },
+            {
+                name: "Discount Code",
+                highValue: {
+                    title: "High-Value Customer (Promo)",
+                    badge: "High Value",
+                    badgeClass: "badge-high-value",
+                    segment: "Womens",
+                    ltv: "£734.20",
+                    cohort: "May 2024",
+                    orders: "4 orders",
+                    subject: "Do you have a current discount code?",
+                    body: "Are there any active promo codes I can use for my next order?",
+                    decision: "provide_guidance",
+                    decisionText: "APPLY GIFT",
+                    priority: "high",
+                    reasoning: "High-value loyal customer. Provide exclusive discount to retain.",
+                    response: "Thanks for asking! I'd love to help. As a valued customer, I'm applying an exclusive 15% discount to your account—no code needed. It's valid for your next 2 orders. Enjoy!"
+                },
+                midValue: {
+                    title: "Mid-Value Customer (Promo)",
+                    badge: "Mid Value",
+                    badgeClass: "badge-mid-value",
+                    segment: "Mens",
+                    ltv: "£156.80",
+                    cohort: "Dec 2024",
+                    orders: "2 orders",
+                    subject: "Any discount codes available?",
+                    body: "Are there any active promo codes I can use for my next order?",
+                    decision: "provide_guidance",
+                    decisionText: "SHARE CURRENT PROMOS",
+                    priority: "normal",
+                    reasoning: "Standard discount inquiry. Share current promotions.",
+                    response: "Great timing! We currently have 10% off site-wide with code PRETTY10. Use that at checkout!"
+                }
+            }
+        ];
+
+        let currentScenarioIndex = 0;
+
+        function renderComparison(scenarioIndex) {
+            const scenario = scenarios[scenarioIndex];
+            const hv = scenario.highValue;
+            const mv = scenario.midValue;
+
+            const decisionClass = (decision) => {
+                if (decision === 'auto_process_return') return 'auto';
+                if (decision.includes('verify')) return 'verify';
+                if (decision.includes('escalate')) return 'escalate';
+                return 'auto';
+            };
+
+            const html = `
+                <div class="comparison-card high-value">
+                    <span class="customer-badge ${hv.badgeClass}">${hv.badge}</span>
+                    <h3>${hv.title}</h3>
+                    <div class="card-label">${hv.segment} Cohort</div>
+
+                    <div class="info-block">
+                        <div class="info-label">LTV</div>
+                        <div class="info-value">${hv.ltv}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Cohort</div>
+                        <div class="info-value">${hv.cohort}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Order History</div>
+                        <div class="info-value">${hv.orders}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Subject</div>
+                        <div class="info-value">${hv.subject}</div>
+                    </div>
+
+                    <div class="decision-box ${decisionClass(hv.decision)}">
+                        <div class="decision-title">Automation Decision</div>
+                        <div class="decision-action">${hv.decisionText}</div>
+                        <div class="info-label">Priority</div>
+                        <div class="info-value ${hv.priority === 'high' ? 'priority-high' : 'priority-normal'}" style="margin-bottom: 12px;">${hv.priority.toUpperCase()}</div>
+                        <div class="info-label">Reasoning</div>
+                        <div class="decision-reasoning">${hv.reasoning}</div>
+                    </div>
+
+                    <div class="agent-response">"${hv.response}"</div>
+                </div>
+
+                <div class="comparison-card mid-value">
+                    <span class="customer-badge ${mv.badgeClass}">${mv.badge}</span>
+                    <h3>${mv.title}</h3>
+                    <div class="card-label">${mv.segment} Cohort</div>
+
+                    <div class="info-block">
+                        <div class="info-label">LTV</div>
+                        <div class="info-value">${mv.ltv}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Cohort</div>
+                        <div class="info-value">${mv.cohort}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Order History</div>
+                        <div class="info-value">${mv.orders}</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="info-label">Subject</div>
+                        <div class="info-value">${mv.subject}</div>
+                    </div>
+
+                    <div class="decision-box ${decisionClass(mv.decision)}">
+                        <div class="decision-title">Automation Decision</div>
+                        <div class="decision-action">${mv.decisionText}</div>
+                        <div class="info-label">Priority</div>
+                        <div class="info-value ${mv.priority === 'high' ? 'priority-high' : 'priority-normal'}" style="margin-bottom: 12px;">${mv.priority.toUpperCase()}</div>
+                        <div class="info-label">Reasoning</div>
+                        <div class="decision-reasoning">${mv.reasoning}</div>
+                    </div>
+
+                    <div class="agent-response">"${mv.response}"</div>
+                </div>
+            `;
+
+            document.getElementById('comparison-content').innerHTML = html;
+        }
+
+        function loadScenario(index) {
+            currentScenarioIndex = index;
+            document.querySelectorAll('.scenario-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            renderComparison(index);
+        }
+
+        function switchTab(tab) {
+            document.getElementById('comparison-tab').classList.toggle('hidden', tab !== 'comparison');
+            document.getElementById('try-own-tab').classList.toggle('hidden', tab !== 'try-own');
+
+            document.querySelectorAll('.tab-button').forEach((btn, i) => {
+                btn.classList.toggle('active',
+                    (tab === 'comparison' && i === 0) || (tab === 'try-own' && i === 1)
+                );
+            });
+        }
+
+        function classifyTicket(subject, body) {
+            const text = (subject + " " + body).toLowerCase();
+            if (text.includes('return') || text.includes('exchange') || text.includes('refund')) return 'returns_exchanges';
+            if (text.includes('size') || text.includes('fit')) return 'sizing_fit';
+            if (text.includes('code') || text.includes('discount') || text.includes('promo')) return 'discount_code';
+            if (text.includes('track') || text.includes('order') || text.includes('arrive')) return 'order_status';
+            return 'other';
+        }
+
+        function makeDecision(category, ltv, segment) {
+            const isHighValue = ltv > 500;
+
+            if (category === 'returns_exchanges') {
+                return isHighValue ?
+                    { action: 'AUTO-PROCESS', class: 'auto', priority: 'high', reasoning: 'High-value customer. Auto-process to preserve loyalty.' } :
+                    { action: 'VERIFY THEN PROCESS', class: 'verify', priority: 'normal', reasoning: 'Eligible for return. Ask for brief reason before processing.' };
+            }
+            if (category === 'sizing_fit') {
+                return isHighValue ?
+                    { action: 'PRIORITY GUIDANCE', class: 'auto', priority: 'high', reasoning: 'High-value customer. Provide detailed sizing guidance to maximize conversion.' } :
+                    { action: 'PROVIDE GUIDANCE', class: 'auto', priority: 'normal', reasoning: 'Provide standard sizing guidance.' };
+            }
+            if (category === 'discount_code') {
+                return isHighValue ?
+                    { action: 'APPLY EXCLUSIVE DISCOUNT', class: 'auto', priority: 'high', reasoning: 'Reward loyal high-value customer with exclusive offer.' } :
+                    { action: 'SHARE CURRENT PROMOS', class: 'verify', priority: 'normal', reasoning: 'Direct to current promotions.' };
+            }
+            if (category === 'order_status') {
+                return isHighValue ?
+                    { action: 'URGENT INVESTIGATION', class: 'auto', priority: 'high', reasoning: 'High-value customer with potential churn risk. Investigate immediately.' } :
+                    { action: 'STANDARD INVESTIGATION', class: 'verify', priority: 'normal', reasoning: 'Provide tracking update.' };
+            }
+            return { action: 'ESCALATE', class: 'escalate', priority: 'normal', reasoning: 'Route to specialist team.' };
+        }
+
+        function generateResponse(category, decision, ltv) {
+            const isHighValue = ltv > 500;
+            const responses = {
+                returns_exchanges_high: "Got it! We'll process your return right away. A label is on its way to your email. Once we receive it back, we'll refund you within 5 business days.",
+                returns_exchanges_low: "Thanks for reaching out. Just to help us improve: what didn't work with the item? Once we hear back, we'll send a return label.",
+                sizing_fit_high: "Great question! I'll give you detailed guidance. Let me know your usual size and fit preference, and I'll make the perfect recommendation.",
+                sizing_fit_low: "The item runs true to size. If you usually wear size M, I'd go with M. Let us know if you need anything else!",
+                discount_code_high: "Perfect timing! I'm applying a special 15% loyalty discount to your account—no code needed. Valid for your next 2 orders.",
+                discount_code_low: "Great! We currently have 10% off with code PRETTY10. Use that at checkout for savings.",
+                order_status_high: "I'm looking into this right now. Let me check with fulfillment and get back to you within 1 hour with an update.",
+                order_status_low: "Let me check on the tracking for you. You should hear back shortly with an update."
+            };
+            const key = category + '_' + (isHighValue ? 'high' : 'low');
+            return responses[key] || "Thanks for reaching out. We're here to help!";
+        }
+
+        let currentCustomer = null;
+
+        function lookupCustomer() {
+            const customerId = document.getElementById('customerId').value.trim();
+            const errorDiv = document.getElementById('customerError');
+            const infoDiv = document.getElementById('customerInfo');
+
+            errorDiv.classList.add('hidden');
+            infoDiv.classList.add('hidden');
+
+            if (!customerId) return;
+
+            // Look up in sample customer database
+            const customer = sampleCustomers.find(c => c.id === customerId);
+
+            if (!customer) {
+                errorDiv.textContent = `Customer ${customerId} not found. Try: cust_000001 to cust_000010`;
+                errorDiv.classList.remove('hidden');
+                currentCustomer = null;
+                return;
+            }
+
+            currentCustomer = {
+                id: customerId,
+                segment: customer.segment,
+                cohort: customer.cohort,
+                ltv: customer.ltv,
+                orders: customer.orders
+            };
+
+            const ltvTier = customer.ltv > 500 ? 'high' : 'mid';
+
+            document.getElementById('segmentDisplay').textContent =
+                customer.segment.charAt(0).toUpperCase() + customer.segment.slice(1);
+            document.getElementById('ltvDisplay').textContent = `£${customer.ltv.toFixed(2)} (${ltvTier.toUpperCase()})`;
+            document.getElementById('cohortDisplay').textContent = customer.cohort;
+
+            infoDiv.classList.remove('hidden');
+        }
+
+        async function processCustomTicket() {
+            const customerId = document.getElementById('customerId').value.trim();
+            const subject = document.getElementById('ticketSubject').value;
+            const body = document.getElementById('ticketBody').value;
+
+            if (!customerId || !currentCustomer) {
+                alert('Please enter a valid Customer ID');
+                return;
+            }
+
+            if (!subject) {
+                alert('Please enter a ticket subject');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('customResult').innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="display: inline-block; border: 3px solid var(--gray); border-top: 3px solid var(--accent); border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+                    <div style="color: var(--text-light); font-size: 14px;">Processing ticket with Claude...</div>
+                </div>
+            `;
+            document.getElementById('customResult').classList.remove('hidden');
+
+            try {
+                // Call Flask API to process with real Claude
+                const response = await fetch('/api/process_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticket_id: 'demo_' + Date.now(),
+                        customer_id: customerId,
+                        order_id: '',
+                        product_id: '',
+                        subject: subject,
+                        body: body
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    document.getElementById('customResult').innerHTML = `
+                        <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 14px 16px; border-radius: 6px; border-left: 4px solid var(--danger); font-size: 14px;">
+                            Error: ${result.error}<br><br>
+                            <small style="color: var(--text-light);">Make sure Flask server is running with: python3 app.py</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const decisionClass = {
+                    'auto_process_return': 'auto',
+                    'verify_then_process': 'verify',
+                    'escalate_to_human': 'escalate',
+                    'provide_guidance': 'auto',
+                    'verify_and_apply': 'verify',
+                    'investigate_and_respond': 'auto'
+                }[result.automation_decision] || '';
+
+                const resultHtml = `
+                    <div class="decision-box ${decisionClass}">
+                        <div class="decision-title">Classification & Decision</div>
+                        <div class="info-label" style="margin-top: 12px;">Category</div>
+                        <div class="info-value">${result.category.replace(/_/g, ' ')}</div>
+
+                        <div class="info-label" style="margin-top: 12px;">Customer Context</div>
+                        <div class="info-value">${result.customer_cohort}</div>
+
+                        <div class="info-label">Lifetime Value</div>
+                        <div class="info-value">£${result.customer_ltv.toFixed(2)}</div>
+
+                        <div class="info-label" style="margin-top: 12px;">Decision</div>
+                        <div class="decision-action">${result.automation_decision.replace(/_/g, ' ').toUpperCase()}</div>
+
+                        <div class="info-label">Priority</div>
+                        <div class="info-value ${result.priority === 'high' ? 'priority-high' : 'priority-normal'}" style="margin-bottom: 12px;">${result.priority.toUpperCase()}</div>
+
+                        <div class="info-label">Reasoning</div>
+                        <div class="decision-reasoning">${result.automation_reasoning}</div>
+                    </div>
+
+                    <div class="agent-response" style="margin-top: 16px;">"${result.agent_response}"</div>
+                `;
+
+                document.getElementById('customResult').innerHTML = resultHtml;
+            } catch (error) {
+                document.getElementById('customResult').innerHTML = `
+                    <div style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 14px 16px; border-radius: 6px; border-left: 4px solid var(--danger); font-size: 14px;">
+                        Error: ${error.message}<br><br>
+                        <small style="color: var(--text-light);">Make sure Flask server is running with: python3 app.py</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        renderComparison(0);
+    </script>
+</body>
+</html>

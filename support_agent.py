@@ -115,23 +115,29 @@ def get_ltv_tier(ltv: float) -> str:
 def get_customer_order_history(customer_id: str, limit: int = 5) -> str:
     """Fetch customer's recent order history with status"""
     load_data()
+    # Try full dataset first, fall back to sample data
     orders_df = _data_cache['orders']
+    if orders_df is None or orders_df.empty:
+        try:
+            orders_df = pd.read_csv(os.path.join(DATA_DIR, "sample_orders.csv"))
+        except:
+            return ""
 
     if orders_df is None or orders_df.empty:
-        return "No order history available."
+        return ""
 
     customer_orders = orders_df[orders_df['customer_id'] == customer_id].sort_values(
         'created_at', ascending=False
     ).head(limit)
 
     if customer_orders.empty:
-        return "No orders found."
+        return ""
 
     context = "Recent Orders:\n"
     for idx, (_, order) in enumerate(customer_orders.iterrows(), 1):
         order_id = order.get('order_id', 'N/A')
-        date = order.get('created_at', 'N/A')[:10]
-        status = order.get('fulfillment_status', 'unknown').title()
+        date = str(order.get('created_at', 'N/A'))[:10]
+        status = str(order.get('fulfillment_status', 'unknown')).title()
         total = order.get('total_price', 0)
         context += f"  {idx}. {order_id} ({date}) → {status} (£{total:.2f})\n"
 
@@ -376,7 +382,7 @@ CURRENT ISSUE:
 - Subject: {ticket_context.subject}
 - Category: {category}
 
-CUSTOMER CONTEXT:
+CUSTOMER CONTEXT (USE THIS TO ANSWER QUESTIONS):
 {order_history}
 
 {size_history if size_history else ''}
@@ -392,14 +398,31 @@ ROUTING LOGIC:
 
 TONE: {tone}
 
-Response guidelines:
-- Be concise (2-3 sentences)
-- Use customer's order/size history to give personalized answers
-- For returns within 30 days: Auto-approve immediately (any customer)
-- For quality issues: Express concern, gather details, escalate for investigation
-- For sizing: Provide guidance based on their size history, offer exchange
-- Be warm and helpful - good service builds loyalty
-- Reference specific orders/products when relevant
+CRITICAL RESPONSE GUIDELINES:
+⚠️ IMPORTANT: You have access to customer's order history above. Use it to answer questions WITHOUT asking for more information.
+
+For RETURNS/EXCHANGES:
+- Identify the order from context (e.g., "your last order" = most recent in history)
+- Auto-approve immediately if within 30 days (any customer, no tier requirements)
+- Say: "I can process that exchange for you straight away. Your last order [order_id] qualifies. What size do you need?"
+- DO NOT ask "which order?" - use the order history provided
+
+For SIZING questions:
+- Use their order history to identify which product they're asking about
+- Provide guidance with specifics
+- Offer exchanges for sizing issues
+
+For QUALITY issues:
+- Express concern, acknowledge the problem
+- Say you're escalating to investigation team
+- Promise 24-hour response
+
+General guidelines:
+- Be concise (2-3 sentences max)
+- Reference specific order IDs and dates when relevant
+- Use customer's name naturally
+- Be warm and helpful
+- Never ask for information that's already provided in the context above
 
 If escalating: "I'm escalating this to our team for urgent review. You'll hear from us within 24 hours."
 """

@@ -367,15 +367,39 @@ def generate_response(
         routing = "Provide quick, helpful answer. Escalate only if complex or unusual."
         tone = "Helpful and friendly"
 
-    # Fetch comprehensive context
-    order_history = get_customer_order_history(ticket_context.customer.customer_id, limit=5)
-    size_history = get_customer_size_history(ticket_context.customer.customer_id)
-    return_history = get_return_history(ticket_context.customer.customer_id, limit=3)
-    return_eligibility = get_return_eligibility(
-        ticket_context.customer.customer_id,
-        ticket_context.order_id
-    ) if ticket_context.order_id else ""
-    product_details = get_product_details(ticket_context.product_id)
+    # Fetch comprehensive context (with error handling)
+    try:
+        order_history = get_customer_order_history(ticket_context.customer.customer_id, limit=5)
+    except Exception as e:
+        print(f"Error fetching order history: {e}")
+        order_history = "Unable to fetch order history"
+
+    try:
+        size_history = get_customer_size_history(ticket_context.customer.customer_id)
+    except Exception as e:
+        print(f"Error fetching size history: {e}")
+        size_history = ""
+
+    try:
+        return_history = get_return_history(ticket_context.customer.customer_id, limit=3)
+    except Exception as e:
+        print(f"Error fetching return history: {e}")
+        return_history = ""
+
+    try:
+        return_eligibility = get_return_eligibility(
+            ticket_context.customer.customer_id,
+            ticket_context.order_id
+        ) if ticket_context.order_id else ""
+    except Exception as e:
+        print(f"Error checking return eligibility: {e}")
+        return_eligibility = ""
+
+    try:
+        product_details = get_product_details(ticket_context.product_id)
+    except Exception as e:
+        print(f"Error fetching product details: {e}")
+        product_details = ""
 
     # Build system prompt with order history prominently at top
     system_prompt = f"""You are a support agent for Pretty Fly, a London streetwear brand.

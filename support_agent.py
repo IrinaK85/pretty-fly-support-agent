@@ -1,6 +1,6 @@
 """
-Pretty Fly Support Agent - LTV-aware multi-turn conversations
-Smart routing based on customer value
+Pretty Fly Support Agent - Intelligent multi-turn conversations with comprehensive context
+Automatically fetches customer order history, product details, return eligibility, and more
 """
 
 import os
@@ -9,7 +9,7 @@ import pandas as pd
 from dataclasses import dataclass
 from typing import Optional, List
 from anthropic import Anthropic
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Initialize Anthropic client
 _api_key = os.getenv("ANTHROPIC_API_KEY")
@@ -19,12 +19,17 @@ client = Anthropic(api_key=_api_key) if _api_key else None
 _data_cache = {
     'customers': None,
     'tickets': None,
+    'orders': None,
+    'line_items': None,
+    'products': None,
+    'refunds': None,
 }
 
 # Conversation history storage
 _conversations = {}
 
 DATA_DIR = "data"
+FULL_DATA_DIR = "pretty_fly_data_pack/data"
 
 # LTV tier thresholds and routing rules
 LTV_TIERS = {
@@ -35,15 +40,26 @@ LTV_TIERS = {
 
 
 def load_data():
-    """Load sample data into memory"""
+    """Load sample and full data into memory"""
     global _data_cache
 
     if _data_cache['customers'] is not None:
         return True
 
     try:
+        # Load sample data for demo
         _data_cache['customers'] = pd.read_csv(f"{DATA_DIR}/sample_customers.csv")
         _data_cache['tickets'] = pd.read_csv(f"{DATA_DIR}/sample_tickets.csv")
+
+        # Load full dataset for context enrichment
+        try:
+            _data_cache['orders'] = pd.read_csv(f"{FULL_DATA_DIR}/orders.csv")
+            _data_cache['line_items'] = pd.read_csv(f"{FULL_DATA_DIR}/line_items.csv")
+            _data_cache['products'] = pd.read_csv(f"{FULL_DATA_DIR}/products.csv")
+            _data_cache['refunds'] = pd.read_csv(f"{FULL_DATA_DIR}/refunds.csv")
+        except FileNotFoundError:
+            print("Warning: Full dataset not found, using sample data only")
+
         return True
     except FileNotFoundError:
         print(f"Warning: Sample data not found at {DATA_DIR}")
@@ -94,19 +110,336 @@ def get_ltv_tier(ltv: float) -> str:
         return 'low'
 
 
-def load_data():
-    """Load sample data into memory"""
-    global _data_cache
+def get_customer_order_history(customer_id: str, limit: int = 5) -> str:
+    """Fetch customer's recent order history with status"""
+    load_data()
+    orders_df = _data_cache['orders']
 
-    if _data_cache['customers'] is not None:
-        return True
+    if orders_df is None or orders_df.empty:
+        return "No order history available."
+
+    customer_orders = orders_df[orders_df['customer_id'] == customer_id].sort_values(
+        'created_at', ascending=False
+    ).head(limit)
+
+    if customer_orders.empty:
+        return "No orders found."
+
+    context = "Recent Orders:\n"
+    for idx, (_, order) in enumerate(customer_orders.iterrows(), 1):
+        order_id = order.get('order_id', 'N/A')
+        date = order.get('created_at', 'N/A')[:10]
+        status = order.get('fulfillment_status', 'unknown').title()
+        total = order.get('total_price', 0)
+        context += f"  {idx}. {order_id} ({date}) → {status} (£{total:.2f})\n"
+
+    return context.strip()
+
+
+def get_product_details(product_id: str) -> str:
+    """Fetch product details including size/fit info"""
+    load_data()
+    products_df = _data_cache['products']
+
+    if products_df is None or products_df.empty or not product_id:
+        return ""
+
+    product = products_df[products_df['product_id'] == product_id]
+    if product.empty:
+        return ""
+
+    p = product.iloc[0]
+    details = f"Product: {p.get('title', 'Unknown')}\n"
+    details += f"  Type: {p.get('product_type', 'N/A')}\n"
+    details += f"  Description: {p.get('description', 'N/A')[:150]}\n"
+
+    return details.strip()
+
+
+def get_customer_size_history(customer_id: str) -> str:
+    """Fetch what sizes the customer has ordered before"""
+    load_data()
+    orders_df = _data_cache['orders']
+    line_items_df = _data_cache['line_items']
+
+    if orders_df is None or line_items_df is None:
+        return ""
+
+    customer_orders = orders_df[orders_df['customer_id'] == customer_id]['order_id'].unique()
+    customer_items = line_items_df[line_items_df['order_id'].isin(customer_orders)]
+
+    if customer_items.empty or 'variant_title' not in customer_items.columns:
+        return ""
+
+    sizes = customer_items['variant_title'].dropna().unique()
+    if len(sizes) == 0:
+        return ""
+
+    size_freq = customer_items['variant_title'].value_counts().head(3)
+    context = "Your size history:\n"
+    for size, count in size_freq.items():
+        context += f"  • {size} ({count} orders)\n"
+
+    return context.strip()
+
+
+def get_return_eligibility(customer_id: str, order_id: str) -> str:
+    """Check if customer is eligible for return/refund"""
+    load_data()
+    orders_df = _data_cache['orders']
+    refunds_df = _data_cache['refunds']
+
+    if orders_df is None or orders_df.empty:
+        return "Unable to verify eligibility."
+
+    order = orders_df[orders_df['order_id'] == order_id]
+    if order.empty:
+        return "Order not found."
+
+    order_date = pd.to_datetime(order.iloc[0]['created_at'])
+    days_ago = (datetime.now() - order_date).days
+
+    # Check 30-day window
+    eligible = days_ago <= 30
+    status = "✅ Eligible" if eligible else "❌ Outside return window"
+
+    context = f"Return Eligibility:\n  {status} ({days_ago} days ago)\n"
+
+    # Check return history
+    if refunds_df is not None and not refunds_df.empty:
+        customer_refunds = refunds_df[refunds_df['order_id'].isin(
+            orders_df[orders_df['customer_id'] == customer_id]['order_id'].unique()
+        )]
+        context += f"  Previous returns: {len(customer_refunds)} (limit: 5 per 6 months)\n"
+
+    return context.strip()
+
+
+def get_return_history(customer_id: str, limit: int = 3) -> str:
+    """Fetch customer's return history"""
+    load_data()
+    orders_df = _data_cache['orders']
+    refunds_df = _data_cache['refunds']
+
+    if refunds_df is None or refunds_df.empty or orders_df is None:
+        return ""
+
+    customer_order_ids = orders_df[orders_df['customer_id'] == customer_id]['order_id'].unique()
+    customer_refunds = refunds_df[refunds_df['order_id'].isin(customer_order_ids)].sort_values(
+        'created_at', ascending=False
+    ).head(limit)
+
+    if customer_refunds.empty:
+        return ""
+
+    context = "Return History:\n"
+    for _, refund in customer_refunds.iterrows():
+        reason = refund.get('reason', 'Unknown')
+        amount = refund.get('amount', 0)
+        context += f"  • {reason}: £{amount:.2f}\n"
+
+    return context.strip()
+
+
+def classify_issue(text: str) -> str:
+    """Classify support issue"""
+    text = text.lower()
+
+    if any(word in text for word in ["return", "exchange", "refund", "send back"]):
+        return "returns_exchanges"
+    elif any(word in text for word in ["size", "fit", "too big", "too small"]):
+        return "sizing_fit"
+    elif any(word in text for word in ["track", "delivery", "where", "arrived"]):
+        return "order_status"
+    elif any(word in text for word in ["damaged", "broken", "quality", "defect"]):
+        return "product_quality"
+    else:
+        return "general"
+
+
+def init_conversation(ticket_id: str):
+    """Initialize conversation for a ticket"""
+    if ticket_id not in _conversations:
+        _conversations[ticket_id] = []
+    return _conversations[ticket_id]
+
+
+def get_conversation(ticket_id: str) -> List[Message]:
+    """Get conversation history"""
+    return _conversations.get(ticket_id, [])
+
+
+def add_message(ticket_id: str, role: str, content: str) -> Message:
+    """Add message to conversation"""
+    if ticket_id not in _conversations:
+        _conversations[ticket_id] = []
+
+    msg = Message(role=role, content=content, timestamp=datetime.now().isoformat())
+    _conversations[ticket_id].append(msg)
+    return msg
+
+
+def get_suggested_responses(category: str) -> List[str]:
+    """Get suggested follow-up messages"""
+    suggestions = {
+        "returns_exchanges": [
+            "The hoodie doesn't fit right",
+            "Can you send me a return label?",
+            "I'd like to return it",
+            "When will I get a refund?"
+        ],
+        "sizing_fit": [
+            "Should I size up?",
+            "What's the fit like?",
+            "Is it true to size?",
+            "Do you have sizing guides?"
+        ],
+        "order_status": [
+            "Where is my order?",
+            "When will it arrive?",
+            "Has it shipped?",
+            "Can I track it?"
+        ],
+        "product_quality": [
+            "There's a seam issue",
+            "The color faded",
+            "It arrived damaged",
+            "The fabric feels cheap"
+        ],
+        "general": [
+            "Can you help me?",
+            "I have a question",
+            "I need assistance",
+            "What's your policy?"
+        ]
+    }
+    return suggestions.get(category, suggestions["general"])
+
+
+def generate_response(
+    ticket_context: TicketContext,
+    conversation: List[Message],
+    new_message: str
+) -> str:
+    """Generate Claude response with comprehensive context"""
+
+    if not client:
+        return "Support system not configured."
+
+    # Build conversation for Claude
+    messages = []
+    for msg in conversation[-4:]:  # Last 4 messages
+        messages.append({
+            "role": "user" if msg.role == "customer" else "assistant",
+            "content": msg.content
+        })
+    messages.append({"role": "user", "content": new_message})
+
+    # Determine routing based on issue type
+    category = ticket_context.category
+
+    if category == 'returns_exchanges':
+        routing = "AUTO-APPROVE returns/exchanges within 30 days (all customers). Process quickly and kindly."
+        tone = "Helpful and expedient"
+    elif category == 'product_quality':
+        routing = "ESCALATE quality/damage issues to human team. These need investigation and may indicate product defects."
+        tone = "Empathetic but escalate for investigation"
+    elif category == 'sizing_fit':
+        routing = "Provide detailed sizing guidance using customer's size history. Offer exchanges if sizing is our issue."
+        tone = "Helpful and informative"
+    else:
+        routing = "Provide quick, helpful answer. Escalate only if complex or unusual."
+        tone = "Helpful and friendly"
+
+    # Fetch comprehensive context
+    order_history = get_customer_order_history(ticket_context.customer.customer_id, limit=5)
+    size_history = get_customer_size_history(ticket_context.customer.customer_id)
+    return_history = get_return_history(ticket_context.customer.customer_id, limit=3)
+    return_eligibility = get_return_eligibility(
+        ticket_context.customer.customer_id,
+        ticket_context.order_id
+    ) if ticket_context.order_id else ""
+    product_details = get_product_details(ticket_context.product_id)
+
+    # Build comprehensive system prompt with all context
+    system_prompt = f"""You are a support agent for Pretty Fly, a London streetwear brand.
+
+CUSTOMER PROFILE:
+- Name: {ticket_context.customer.name}
+- Email: {ticket_context.customer.email}
+- Customer Value: £{ticket_context.customer.ltv:.2f} (Tier: {ticket_context.customer.ltv_tier.upper()})
+- Total Orders: {ticket_context.customer.order_count}
+
+CURRENT ISSUE:
+- Subject: {ticket_context.subject}
+- Category: {category}
+
+CUSTOMER CONTEXT:
+{order_history}
+
+{size_history if size_history else ''}
+
+{return_history if return_history else ''}
+
+{return_eligibility if return_eligibility else ''}
+
+{product_details if product_details else ''}
+
+ROUTING LOGIC:
+{routing}
+
+TONE: {tone}
+
+Response guidelines:
+- Be concise (2-3 sentences)
+- Use customer's order/size history to give personalized answers
+- For returns within 30 days: Auto-approve immediately (any customer)
+- For quality issues: Express concern, gather details, escalate for investigation
+- For sizing: Provide guidance based on their size history, offer exchange
+- Be warm and helpful - good service builds loyalty
+- Reference specific orders/products when relevant
+
+If escalating: "I'm escalating this to our team for urgent review. You'll hear from us within 24 hours."
+"""
 
     try:
-        _data_cache['customers'] = pd.read_csv(f"{DATA_DIR}/sample_customers.csv")
-        _data_cache['tickets'] = pd.read_csv(f"{DATA_DIR}/sample_tickets.csv")
-        return True
-    except:
-        return False
+        response = client.messages.create(
+            model="claude-opus-4-8",
+            max_tokens=300,
+            system=system_prompt,
+            messages=messages
+        )
+        return response.content[0].text
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+
+def process_ticket_message(ticket_id: str, customer_message: str) -> dict:
+    """Process a new message in a ticket"""
+
+    ticket_context = get_ticket_context(ticket_id)
+    if not ticket_context:
+        return {"error": "Ticket not found"}
+
+    conversation = init_conversation(ticket_id)
+
+    add_message(ticket_id, "customer", customer_message)
+
+    ticket_context.category = classify_issue(customer_message)
+
+    bot_response = generate_response(ticket_context, conversation, customer_message)
+
+    add_message(ticket_id, "agent", bot_response)
+
+    return {
+        "ticket_id": ticket_id,
+        "customer_name": ticket_context.customer.name,
+        "customer_ltv": ticket_context.customer.ltv,
+        "customer_tier": ticket_context.customer.ltv_tier,
+        "bot_response": bot_response,
+        "category": ticket_context.category,
+        "suggested_responses": get_suggested_responses(ticket_context.category)
+    }
 
 
 def get_sample_tickets() -> List[dict]:
@@ -194,226 +527,46 @@ def get_ticket_context(ticket_id: str) -> Optional[TicketContext]:
     )
 
 
-def classify_issue(text: str) -> str:
-    """Classify support issue"""
-    text = text.lower()
-
-    if any(word in text for word in ["return", "exchange", "refund", "send back"]):
-        return "returns_exchanges"
-    elif any(word in text for word in ["size", "fit", "too big", "too small"]):
-        return "sizing_fit"
-    elif any(word in text for word in ["track", "delivery", "where", "arrived"]):
-        return "order_status"
-    elif any(word in text for word in ["damaged", "broken", "quality", "defect"]):
-        return "product_quality"
-    else:
-        return "general"
-
-
-def init_conversation(ticket_id: str):
-    """Initialize conversation for a ticket"""
-    if ticket_id not in _conversations:
-        _conversations[ticket_id] = []
-    return _conversations[ticket_id]
-
-
-def get_conversation(ticket_id: str) -> List[Message]:
-    """Get conversation history"""
-    return _conversations.get(ticket_id, [])
-
-
-def add_message(ticket_id: str, role: str, content: str) -> Message:
-    """Add message to conversation"""
-    if ticket_id not in _conversations:
-        _conversations[ticket_id] = []
-
-    msg = Message(role=role, content=content, timestamp=datetime.now().isoformat())
-    _conversations[ticket_id].append(msg)
-    return msg
-
-
-def get_suggested_responses(category: str) -> List[str]:
-    """Get suggested follow-up messages"""
-    suggestions = {
-        "returns_exchanges": [
-            "The hoodie doesn't fit right",
-            "Can you send me a return label?",
-            "I'd like to return it",
-            "When will I get a refund?"
-        ],
-        "sizing_fit": [
-            "Should I size up?",
-            "What's the fit like?",
-            "Is it true to size?",
-            "Do you have sizing guides?"
-        ],
-        "order_status": [
-            "Where is my order?",
-            "When will it arrive?",
-            "Has it shipped?",
-            "Can I track it?"
-        ],
-        "product_quality": [
-            "There's a seam issue",
-            "The color faded",
-            "It arrived damaged",
-            "The fabric feels cheap"
-        ],
-        "general": [
-            "Can you help me?",
-            "I have a question",
-            "I need assistance",
-            "What's your policy?"
-        ]
-    }
-    return suggestions.get(category, suggestions["general"])
-
-
-def generate_response(
-    ticket_context: TicketContext,
-    conversation: List[Message],
-    new_message: str
-) -> str:
-    """Generate Claude response with intelligent issue-based routing"""
-
-    if not client:
-        return "Support system not configured."
-
-    # Build conversation for Claude
-    messages = []
-    for msg in conversation[-4:]:  # Last 4 messages
-        messages.append({
-            "role": "user" if msg.role == "customer" else "assistant",
-            "content": msg.content
-        })
-    messages.append({"role": "user", "content": new_message})
-
-    # Determine routing based on issue type, not just customer value
-    category = ticket_context.category
-
-    if category == 'returns_exchanges':
-        routing = "AUTO-APPROVE returns/exchanges within 30 days (all customers). Process quickly and kindly."
-        tone = "Helpful and expedient"
-    elif category == 'product_quality':
-        routing = "ESCALATE quality/damage issues to human team. These need investigation and may indicate product defects."
-        tone = "Empathetic but escalate for investigation"
-    elif category == 'sizing_fit':
-        routing = "Provide detailed sizing guidance. Offer exchanges if sizing is our issue."
-        tone = "Helpful and informative"
-    else:
-        routing = "Provide quick, helpful answer. Escalate only if complex or unusual."
-        tone = "Helpful and friendly"
-
-    # System prompt with issue-based routing
-    system_prompt = f"""You are a support agent for Pretty Fly, a London streetwear brand.
-
-CUSTOMER:
-- Name: {ticket_context.customer.name}
-- LTV: £{ticket_context.customer.ltv:.2f}
-- Orders: {ticket_context.customer.order_count}
-
-ISSUE: {ticket_context.subject}
-CATEGORY: {category}
-
-ROUTING LOGIC:
-{routing}
-
-TONE: {tone}
-
-Response guidelines:
-- Be concise (2-3 sentences)
-- For returns within 30 days: Auto-approve immediately (any customer)
-- For quality issues: Express concern, gather details, escalate for investigation
-- For sizing: Provide guidance, offer exchange
-- Be warm and helpful - good service builds loyalty
-
-If escalating: "I'm escalating this to our team for urgent review. You'll hear from us within 24 hours."
-"""
-
-    try:
-        response = client.messages.create(
-            model="claude-opus-4-8",
-            max_tokens=300,
-            system=system_prompt,
-            messages=messages
-        )
-        return response.content[0].text
-    except Exception as e:
-        return f"Error: {str(e)}"
-
-
-def process_ticket_message(ticket_id: str, customer_message: str) -> dict:
-    """Process a new message in a ticket"""
-
-    ticket_context = get_ticket_context(ticket_id)
-    if not ticket_context:
-        return {"error": "Ticket not found"}
-
-    conversation = init_conversation(ticket_id)
-
-    add_message(ticket_id, "customer", customer_message)
-
-    ticket_context.category = classify_issue(customer_message)
-
-    bot_response = generate_response(ticket_context, conversation, customer_message)
-
-    add_message(ticket_id, "agent", bot_response)
-
-    return {
-        "ticket_id": ticket_id,
-        "customer_name": ticket_context.customer.name,
-        "customer_ltv": ticket_context.customer.ltv,
-        "customer_tier": ticket_context.customer.ltv_tier,
-        "bot_response": bot_response,
-        "category": ticket_context.category,
-        "suggested_responses": get_suggested_responses(ticket_context.category)
-    }
-
-
 def get_metrics() -> dict:
-    """Calculate support metrics from FULL DATASET (not just sample)"""
-    # Load full dataset for accurate metrics
+    """Calculate support metrics from FULL DATASET"""
+    load_data()
+
     try:
         full_tickets_df = pd.read_csv("pretty_fly_data_pack/data/support_tickets.csv")
         full_customers_df = pd.read_csv("pretty_fly_data_pack/data/customers.csv")
     except:
-        # Fallback to sample data if full not available
-        load_data()
         full_tickets_df = _data_cache['tickets']
         full_customers_df = _data_cache['customers']
 
     if full_tickets_df is None or full_customers_df is None:
         return {}
 
-    # Merge for LTV (use total_spent from full dataset, ltv from sample)
-    ltv_column = 'ltv' if 'ltv' in full_customers_df.columns else 'total_spent'
+    # Merge for LTV
     tickets_with_ltv = full_tickets_df.merge(
-        full_customers_df[['customer_id', ltv_column]],
+        full_customers_df[['customer_id', 'ltv']],
         on='customer_id',
         how='left'
     )
-    tickets_with_ltv = tickets_with_ltv.rename(columns={ltv_column: 'ltv_value'})
+    tickets_with_ltv = tickets_with_ltv.rename(columns={'ltv': 'ltv_value'})
 
     high_ltv = tickets_with_ltv[tickets_with_ltv['ltv_value'] > 300]
     medium_ltv = tickets_with_ltv[(tickets_with_ltv['ltv_value'] >= 150) & (tickets_with_ltv['ltv_value'] <= 300)]
     low_ltv = tickets_with_ltv[tickets_with_ltv['ltv_value'] < 150]
 
-    # Calculate auto-resolution rate and time savings from FULL dataset
+    # Calculate auto-resolution rate from full dataset
     auto_resolvable = full_tickets_df[full_tickets_df['category'].isin([
         'returns_exchanges', 'sizing_fit', 'order_status', 'discount_code'
     ])]
     auto_resolution_rate = len(auto_resolvable) / len(full_tickets_df) if len(full_tickets_df) > 0 else 0
 
-    # Calculate time savings: 24 months data → annual figure
-    # Avg human time: 756 min, Claude time: 5 min, savings per ticket: 12.52 hours
+    # Calculate time savings
     human_tickets = full_tickets_df[full_tickets_df['resolved_by'] == 'human']
     avg_human_time_min = human_tickets['resolution_time_minutes'].mean() if len(human_tickets) > 0 else 756
-    time_saved_per_ticket_hr = (avg_human_time_min - 5) / 60  # Claude takes ~5 min
+    time_saved_per_ticket_hr = (avg_human_time_min - 5) / 60
 
-    annual_auto_resolvable = len(auto_resolvable) / 2  # 24-month dataset → 12 months
+    annual_auto_resolvable = len(auto_resolvable) / 2
     total_hours_saved = annual_auto_resolvable * time_saved_per_ticket_hr
 
-    # Cost savings at £16/hour (conservative UK average)
     uk_hourly_rate = 16
     cost_savings = int(total_hours_saved * uk_hourly_rate)
 
@@ -430,7 +583,7 @@ def get_metrics() -> dict:
         'cost_savings': cost_savings,
         'refund_reduction': 61138,
         'marketing_uplift': 140180,
-        'total_impact': cost_savings + 61138 + 140180,  # Dynamic total
+        'total_impact': cost_savings + 61138 + 140180,
         'year1_investment': 9000,
         'year2_operating': 4000
     }
@@ -438,4 +591,4 @@ def get_metrics() -> dict:
 
 if __name__ == "__main__":
     load_data()
-    print("✅ Support agent ready")
+    print("✅ Support agent ready with comprehensive context")

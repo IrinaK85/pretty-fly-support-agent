@@ -1,0 +1,14 @@
+ticket_id,customer_id,created_at,channel,status,priority,category,subject,related_order_id,related_product_id,first_response_at,resolved_at,resolution_time_minutes,satisfaction_rating,resolved_by
+tkt_00167,cust_004557,2024-10-10T13:36:39,instagram_dm,resolved,high,returns_exchanges,Return label not working,ord_006602,prod_00027,2024-10-10T12:17:00,2024-10-10T23:15:00,1275,5.0,human
+tkt_00249,cust_014825,2025-09-30T21:18:53,chat,resolved,low,returns_exchanges,Return label not working,ord_029452,prod_00025,2025-09-30T12:51:00,2025-09-30T23:26:00,1226,,human
+tkt_00276,cust_006899,2025-11-04T11:21:41,instagram_dm,resolved,low,order_status,Order hasn't arrived,ord_031773,prod_00035,2025-11-04T13:04:00,2025-11-04T11:30:00,90,2.0,human
+tkt_00295,cust_017463,2025-12-22T20:05:39,chat,resolved,low,sizing_fit,Sizing question about Womens Fitted Tee,ord_037421,prod_00051,2025-12-22T10:02:00,2025-12-22T10:19:00,19,1.0,bot
+tkt_00370,cust_018148,2026-04-09T14:31:55,email,resolved,normal,order_status,No delivery update for Winter Logo Tee,ord_045350,prod_00031,2026-04-09T11:08:00,2026-04-09T23:12:00,792,,human
+tkt_00372,cust_008470,2025-01-15T10:15:12,email,resolved,high,sizing_fit,Is the Heritage Tee true to size?,ord_014498,prod_00012,2025-01-15T11:10:00,2025-01-15T23:33:00,993,4.0,human
+tkt_00467,cust_007683,2025-09-20T12:23:31,email,resolved,normal,order_status,Where's my order?,ord_029308,prod_00012,2025-09-20T10:45:00,2025-09-20T19:47:00,587,,human
+tkt_00581,cust_006332,2025-08-29T21:19:47,chat,resolved,normal,order_status,Where's my order?,ord_027363,prod_00008,2025-08-29T11:59:00,2025-08-29T23:43:00,943,,human
+tkt_00613,cust_006899,2025-12-03T12:11:42,instagram_dm,resolved,normal,product_quality,Colour faded after wash,ord_034800,prod_00002,2025-12-03T12:57:00,2025-12-03T20:53:00,653,,human
+tkt_00718,cust_010930,2026-02-28T09:23:13,email,resolved,low,order_status,Where's my order?,ord_042655,prod_00029,2026-02-28T12:41:00,2026-02-28T21:38:00,698,,human
+tkt_00799,cust_007069,2024-12-01T18:50:37,email,resolved,low,sizing_fit,Size exchange needed,ord_011311,prod_00024,2024-12-01T11:45:00,2024-12-01T23:33:00,1413,,human
+tkt_01016,cust_017254,2026-01-02T12:37:51,email,resolved,normal,product_quality,Colour faded after wash,ord_038250,prod_00007,2026-01-02T12:35:00,2026-01-02T23:23:00,1223,,human
+tkt_01025,cust_003757,2024-09-09T21:41:51,chat,resolved,normal,drop_restock,Will there be more sizes?,ord_005162,prod_00026,2024-09-09T10:03:00,2024-09-09T10:13:00,13,,bot

@@ -1,422 +1,308 @@
 """
-Pretty Fly Support Agent - CSV-based, Claude-powered
-Real-time support ticket processing with customer context
+Pretty Fly Support Agent - Multi-turn conversations with Claude
+Real-time support ticket processing with conversation history
 """
 
 import os
 import json
 import pandas as pd
-from dataclasses import dataclass, asdict
-from typing import Optional
+from dataclasses import dataclass
+from typing import Optional, List
 from anthropic import Anthropic
 from datetime import datetime
 
-# Initialize Anthropic client (API key from environment)
+# Initialize Anthropic client
 _api_key = os.getenv("ANTHROPIC_API_KEY")
 client = Anthropic(api_key=_api_key) if _api_key else None
 
-# Global data cache (loaded once on startup)
+# Global data cache
 _data_cache = {
     'customers': None,
     'orders': None,
-    'line_items': None,
-    'variants': None,
-    'products': None,
-    'refunds': None,
+    'tickets': None,
 }
 
-DATA_DIR = "pretty_fly_data_pack/data"
+# Conversation history storage (in-memory for demo)
+_conversations = {}
+
+DATA_DIR = "data"
 
 
 def load_data():
-    """Load all CSV data into memory (optional for Vercel deployment)"""
+    """Load sample data into memory"""
     global _data_cache
 
     if _data_cache['customers'] is not None:
-        return  # Already loaded
+        return True
 
     try:
-        _data_cache['customers'] = pd.read_csv(f"{DATA_DIR}/customers.csv")
-        _data_cache['orders'] = pd.read_csv(f"{DATA_DIR}/orders.csv", parse_dates=['created_at'])
-        _data_cache['line_items'] = pd.read_csv(f"{DATA_DIR}/line_items.csv")
-        _data_cache['variants'] = pd.read_csv(f"{DATA_DIR}/variants.csv")
-        _data_cache['products'] = pd.read_csv(f"{DATA_DIR}/products.csv")
-        _data_cache['refunds'] = pd.read_csv(f"{DATA_DIR}/refunds.csv")
+        _data_cache['customers'] = pd.read_csv(f"{DATA_DIR}/sample_customers.csv")
+        _data_cache['orders'] = pd.read_csv(f"{DATA_DIR}/sample_orders.csv", parse_dates=['created_at'])
+        _data_cache['tickets'] = pd.read_csv(f"{DATA_DIR}/sample_tickets.csv")
         return True
     except FileNotFoundError:
-        print(f"Warning: CSV data files not found at {DATA_DIR}. Running with mock data.")
-        # Create empty DataFrames so API still works
-        _data_cache['customers'] = pd.DataFrame(columns=['customer_id', 'created_at', 'gender_segment_affinity'])
-        _data_cache['orders'] = pd.DataFrame(columns=['order_id', 'customer_id', 'created_at', 'total_price', 'financial_status', 'fulfillment_status'])
-        _data_cache['refunds'] = pd.DataFrame(columns=['order_id', 'refund_id'])
-        _data_cache['products'] = pd.DataFrame(columns=['product_id', 'title', 'product_type', 'gender_segment'])
+        print(f"Warning: Sample data not found at {DATA_DIR}")
         return False
     except Exception as e:
-        print(f"Warning: Could not load CSV data: {e}")
+        print(f"Warning: Could not load data: {e}")
         return False
+
+
+@dataclass
+class Message:
+    """A message in conversation"""
+    role: str
+    content: str
+    timestamp: str
 
 
 @dataclass
 class CustomerContext:
-    """Context assembled for a customer"""
+    """Customer info"""
     customer_id: str
-    cohort_month: str
+    name: str
+    email: str
+    ltv: float
+    order_count: int
     cohort_gender: str
-    lifetime_value: float
-    repeat_rate: float
-    total_orders: int
-    refund_rate: float
-    recent_orders: list
 
 
 @dataclass
 class TicketContext:
-    """Full context for a support ticket"""
+    """Ticket context"""
     ticket_id: str
-    category: str
+    customer: CustomerContext
+    order_id: str
+    product_id: str
     subject: str
-    customer_context: CustomerContext
-    order_info: dict
-    product_info: dict
-    eligibility: dict
+    category: str
 
 
-def classify_ticket(subject: str, body: str) -> str:
-    """Classify support ticket into category using keywords"""
-    text = (subject + " " + body).lower()
+def get_sample_tickets() -> List[dict]:
+    """Get list of support tickets"""
+    load_data()
 
-    if any(word in text for word in ["return", "exchange", "send back", "refund"]):
-        return "returns_exchanges"
-    elif any(word in text for word in ["size", "fit", "too big", "too small", "length"]):
-        return "sizing_fit"
-    elif any(word in text for word in ["code", "discount", "promo", "coupon"]):
-        return "discount_code"
-    elif any(word in text for word in ["track", "order", "arrive", "delivery", "where"]):
-        return "order_status"
-    elif any(word in text for word in ["quality", "broken", "torn", "fade", "defect"]):
-        return "product_quality"
-    elif any(word in text for word in ["restock", "drop", "available", "when"]):
-        return "drop_restock"
-    else:
-        return "other"
+    tickets_df = _data_cache['tickets']
+    if tickets_df is None or len(tickets_df) == 0:
+        return []
+
+    customers_df = _data_cache['customers']
+    result = []
+
+    for _, ticket in tickets_df.head(15).iterrows():
+        customer = customers_df[customers_df['customer_id'] == ticket['customer_id']]
+        if not customer.empty:
+            c = customer.iloc[0]
+            result.append({
+                'ticket_id': ticket['ticket_id'],
+                'customer_id': ticket['customer_id'],
+                'customer_name': f"{c.get('first_name', 'Customer')}",
+                'subject': ticket.get('subject', 'Support Request'),
+                'category': ticket.get('category', 'general'),
+                'ltv': float(c.get('ltv', 0)),
+                'order_id': str(ticket.get('related_order_id', '')),
+                'product_id': str(ticket.get('related_product_id', ''))
+            })
+
+    return result
 
 
-def get_customer_context(customer_id: str) -> Optional[CustomerContext]:
-    """Assemble customer context from in-memory data"""
+def get_customer_context(customer_id: str) -> CustomerContext:
+    """Get customer context"""
     load_data()
 
     customers_df = _data_cache['customers']
-    orders_df = _data_cache['orders']
-    refunds_df = _data_cache['refunds']
+    if customers_df is None or customers_df.empty:
+        return CustomerContext(customer_id, "Unknown", "unknown@example.com", 0, 0, "Unknown")
 
-    # Get customer info
     customer = customers_df[customers_df['customer_id'] == customer_id]
     if customer.empty:
-        # Return mock context if no data (for Vercel deployment without CSV files)
-        return CustomerContext(
-            customer_id=customer_id,
-            cohort_month="unknown",
-            cohort_gender="Unknown",
-            lifetime_value=0,
-            repeat_rate=0,
-            total_orders=0,
-            refund_rate=0,
-            recent_orders=[]
-        )
+        return CustomerContext(customer_id, "Unknown", "unknown@example.com", 0, 0, "Unknown")
 
-    customer_row = customer.iloc[0]
-    customer_id = customer_row['customer_id']
-    cohort_month = str(customer_row['created_at'][:7])
-    cohort_gender = customer_row.get('gender_segment_affinity', 'Unknown')
-
-    # Get customer orders
-    customer_orders = orders_df[orders_df['customer_id'] == customer_id]
-    if customer_orders.empty:
-        # Return basic context if no orders
-        return CustomerContext(
-            customer_id=customer_id,
-            cohort_month=cohort_month,
-            cohort_gender=cohort_gender,
-            lifetime_value=0,
-            repeat_rate=0,
-            total_orders=0,
-            refund_rate=0,
-            recent_orders=[]
-        )
-
-    total_orders = len(customer_orders)
-    lifetime_value = customer_orders['total_price'].sum()
-
-    # Calculate repeat rate (orders per month)
-    date_range_days = (customer_orders['created_at'].max() - customer_orders['created_at'].min()).days + 1
-    repeat_rate_monthly = (total_orders / max(date_range_days, 1)) * 30
-
-    # Calculate refund rate
-    refund_orders = refunds_df[refunds_df['order_id'].isin(customer_orders['order_id'])]
-    refund_rate = (len(refund_orders.drop_duplicates('order_id')) / total_orders * 100) if total_orders > 0 else 0
-
-    # Get recent orders
-    recent_orders = []
-    for _, order_row in customer_orders.nlargest(3, 'created_at').iterrows():
-        recent_orders.append({
-            "order_id": order_row['order_id'],
-            "date": str(order_row['created_at']),
-            "total": float(order_row['total_price']),
-            "products": "N/A"  # Would need line_items join
-        })
-
+    c = customer.iloc[0]
     return CustomerContext(
         customer_id=customer_id,
-        cohort_month=cohort_month,
-        cohort_gender=cohort_gender,
-        lifetime_value=float(lifetime_value),
-        repeat_rate=float(repeat_rate_monthly),
-        total_orders=total_orders,
-        refund_rate=float(refund_rate),
-        recent_orders=recent_orders
+        name=f"{c.get('first_name', '')} {c.get('last_name', '')}".strip(),
+        email=c.get('email', ''),
+        ltv=float(c.get('ltv', 0)),
+        order_count=int(c.get('order_count', 0)),
+        cohort_gender=c.get('gender_segment_affinity', 'Unknown')
     )
 
 
-def get_order_info(order_id: str) -> dict:
-    """Get order details"""
+def get_ticket_context(ticket_id: str) -> Optional[TicketContext]:
+    """Get ticket context"""
     load_data()
 
-    orders_df = _data_cache['orders']
-    order = orders_df[orders_df['order_id'] == order_id]
+    tickets_df = _data_cache['tickets']
+    if tickets_df is None:
+        return None
 
-    if order.empty:
-        return {}
+    ticket = tickets_df[tickets_df['ticket_id'] == ticket_id]
+    if ticket.empty:
+        return None
 
-    order_row = order.iloc[0]
-    days_since = (datetime.fromisoformat('2026-06-01') - pd.Timestamp(order_row['created_at'])).days
+    t = ticket.iloc[0]
+    customer = get_customer_context(t['customer_id'])
 
-    return {
-        "order_id": order_row['order_id'],
-        "created_at": str(order_row['created_at']),
-        "total_price": float(order_row['total_price']),
-        "financial_status": order_row.get('financial_status', 'Unknown'),
-        "fulfillment_status": order_row.get('fulfillment_status', 'Unknown'),
-        "days_since_order": days_since
-    }
-
-
-def get_product_info(product_id: str) -> dict:
-    """Get product details"""
-    load_data()
-
-    products_df = _data_cache['products']
-    product = products_df[products_df['product_id'] == product_id]
-
-    if product.empty:
-        return {}
-
-    product_row = product.iloc[0]
-
-    return {
-        "product_id": product_row['product_id'],
-        "title": product_row.get('title', 'Unknown'),
-        "product_type": product_row.get('product_type', 'Unknown'),
-        "gender_segment": product_row.get('gender_segment', 'Unknown'),
-        "size_related_returns": 0  # Simplified for now
-    }
+    return TicketContext(
+        ticket_id=ticket_id,
+        customer=customer,
+        order_id=str(t.get('related_order_id', '')),
+        product_id=str(t.get('related_product_id', '')),
+        subject=t.get('subject', 'Support Request'),
+        category=t.get('category', 'general')
+    )
 
 
-def assess_return_eligibility(order_info: dict, product_info: dict) -> dict:
-    """Assess if a return is eligible"""
-    days_since = order_info.get("days_since_order", 999)
+def classify_issue(text: str) -> str:
+    """Classify support issue"""
+    text = text.lower()
 
-    return {
-        "eligible": days_since <= 30,
-        "days_since_order": days_since,
-        "reason": "Within 30-day window" if days_since <= 30 else f"Outside 30-day window ({days_since} days ago)"
-    }
-
-
-def make_automation_decision(
-    category: str,
-    customer_context: CustomerContext,
-    order_info: dict,
-    eligibility: dict
-) -> dict:
-    """
-    Decide whether to auto-resolve, escalate, or ask for verification
-    Based on category AND customer value
-    """
-    ltv = customer_context.lifetime_value
-    is_high_value = ltv > 200
-
-    decision = {
-        "action": "escalate_to_human",
-        "reasoning": "",
-        "priority": "normal"
-    }
-
-    if category == "returns_exchanges":
-        if eligibility.get("eligible") and is_high_value:
-            decision["action"] = "auto_process_return"
-            decision["reasoning"] = f"High-value customer ({customer_context.cohort_gender} cohort, LTV £{ltv:.0f}). Within return window."
-            decision["priority"] = "high"
-        elif eligibility.get("eligible"):
-            decision["action"] = "verify_then_process"
-            decision["reasoning"] = "Eligible for return. Verify reason before processing."
-            decision["priority"] = "normal"
-        else:
-            decision["action"] = "escalate_to_human"
-            decision["reasoning"] = f"Outside 30-day window ({eligibility.get('days_since_order')} days). Needs discretion."
-            decision["priority"] = "normal"
-
-    elif category == "discount_code":
-        decision["action"] = "verify_and_apply"
-        decision["reasoning"] = "Check code validity; apply if valid."
-        decision["priority"] = "high" if is_high_value else "normal"
-
-    elif category == "sizing_fit":
-        decision["action"] = "provide_guidance"
-        decision["reasoning"] = f"Provide product-specific sizing guidance."
-        decision["priority"] = "high" if is_high_value else "normal"
-
-    elif category == "order_status":
-        days_since = order_info.get("days_since_order", 0)
-        if days_since > 10:
-            decision["action"] = "investigate_and_respond"
-            decision["reasoning"] = f"Order {days_since} days old. Investigate tracking."
-            decision["priority"] = "high"
-        else:
-            decision["action"] = "provide_tracking"
-            decision["reasoning"] = "Provide tracking info."
-            decision["priority"] = "normal"
-
-    elif category == "product_quality":
-        decision["action"] = "escalate_to_human"
-        decision["reasoning"] = "Quality complaints need human judgment."
-        decision["priority"] = "high"
-
+    if any(word in text for word in ["return", "exchange", "refund", "send back"]):
+        return "returns_exchanges"
+    elif any(word in text for word in ["size", "fit", "too big", "too small"]):
+        return "sizing_fit"
+    elif any(word in text for word in ["track", "delivery", "where", "arrived"]):
+        return "order_status"
+    elif any(word in text for word in ["damaged", "broken", "quality", "defect"]):
+        return "product_quality"
     else:
-        decision["action"] = "escalate_to_human"
-        decision["reasoning"] = "Unclear issue. Route to human agent."
-        decision["priority"] = "normal"
+        return "general"
 
-    return decision
+
+def init_conversation(ticket_id: str):
+    """Initialize conversation for a ticket"""
+    if ticket_id not in _conversations:
+        _conversations[ticket_id] = []
+    return _conversations[ticket_id]
+
+
+def get_conversation(ticket_id: str) -> List[Message]:
+    """Get conversation history"""
+    return _conversations.get(ticket_id, [])
+
+
+def add_message(ticket_id: str, role: str, content: str) -> Message:
+    """Add message to conversation"""
+    if ticket_id not in _conversations:
+        _conversations[ticket_id] = []
+
+    msg = Message(role=role, content=content, timestamp=datetime.now().isoformat())
+    _conversations[ticket_id].append(msg)
+    return msg
+
+
+def get_suggested_responses(category: str) -> List[str]:
+    """Get suggested follow-up messages"""
+    suggestions = {
+        "returns_exchanges": [
+            "The hoodie doesn't fit right",
+            "Can you send me a return label?",
+            "I'd like to return it",
+            "When will I get a refund?"
+        ],
+        "sizing_fit": [
+            "Should I size up?",
+            "What's the fit like?",
+            "Is it true to size?",
+            "Do you have sizing guides?"
+        ],
+        "order_status": [
+            "Where is my order?",
+            "When will it arrive?",
+            "Has it shipped?",
+            "Can I track it?"
+        ],
+        "product_quality": [
+            "There's a seam issue",
+            "The color faded",
+            "It arrived damaged",
+            "The fabric feels cheap"
+        ],
+        "general": [
+            "Can you help me?",
+            "I have a question",
+            "I need assistance",
+            "What's your policy?"
+        ]
+    }
+    return suggestions.get(category, suggestions["general"])
 
 
 def generate_response(
-    ticket_subject: str,
-    ticket_body: str,
-    category: str,
-    context: TicketContext,
-    automation_decision: dict
+    ticket_context: TicketContext,
+    conversation: List[Message],
+    new_message: str
 ) -> str:
-    """Use Claude to generate a support response in real-time"""
-
-    # Build context prompt
-    context_prompt = f"""
-Customer Context:
-- Cohort: {context.customer_context.cohort_gender} ({context.customer_context.cohort_month})
-- Lifetime Value: £{context.customer_context.lifetime_value:.2f}
-- Total Orders: {context.customer_context.total_orders}
-- Repeat Rate: {context.customer_context.repeat_rate:.2f} orders/month
-- Recent Orders: {json.dumps(context.customer_context.recent_orders[:2], default=str)}
-
-Order Context (if applicable):
-- Days Since Order: {context.order_info.get('days_since_order', 'N/A')}
-- Status: {context.order_info.get('fulfillment_status', 'N/A')}
-- Price: £{context.order_info.get('total_price', 'N/A')}
-
-Product: {context.product_info.get('title', 'Unknown')}
-Category: {category}
-
-Automation Plan: {automation_decision['action']}
-Reasoning: {automation_decision['reasoning']}
-
-Generate a friendly, helpful response that:
-1. Acknowledges the customer's issue
-2. Takes action appropriate to the category and customer value
-3. Sets clear expectations
-4. Reflects the automation decision
-
-Keep response to 2-3 sentences. Be warm but concise. Sign as Pretty Fly Support.
-"""
+    """Generate Claude response"""
 
     if not client:
-        return "Support agent is not properly configured. Please set ANTHROPIC_API_KEY environment variable."
+        return "Support system not configured."
+
+    # Build conversation for Claude
+    messages = []
+    for msg in conversation[-4:]:  # Last 4 messages
+        messages.append({
+            "role": "user" if msg.role == "customer" else "assistant",
+            "content": msg.content
+        })
+    messages.append({"role": "user", "content": new_message})
+
+    # System prompt with context
+    system_prompt = f"""You are a helpful support agent for Pretty Fly, a London streetwear brand.
+
+CUSTOMER:
+- Name: {ticket_context.customer.name}
+- Lifetime Value: £{ticket_context.customer.ltv:.2f}
+- Orders: {ticket_context.customer.order_count}
+- Gender Segment: {ticket_context.customer.cohort_gender}
+
+TICKET:
+- Subject: {ticket_context.subject}
+- Category: {ticket_context.category}
+
+Be friendly, concise (2-3 sentences), and action-oriented. For high-value customers (LTV > £200), prioritize resolution."""
 
     try:
         response = client.messages.create(
             model="claude-opus-4-8",
             max_tokens=300,
-            system="You are a support agent for Pretty Fly, a London streetwear brand. Be helpful, friendly, and action-oriented.",
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Ticket: {ticket_subject}\n\nCustomer message: {ticket_body}\n\n{context_prompt}"
-                }
-            ]
+            system=system_prompt,
+            messages=messages
         )
         return response.content[0].text
     except Exception as e:
-        return f"Error generating response: {str(e)}"
+        return f"Error: {str(e)}"
 
 
-def process_ticket(
-    ticket_id: str,
-    customer_id: str,
-    order_id: str,
-    product_id: str,
-    subject: str,
-    body: str
-) -> dict:
-    """Process a support ticket end-to-end"""
+def process_ticket_message(ticket_id: str, customer_message: str) -> dict:
+    """Process a new message in a ticket"""
 
-    # 1. Classify
-    category = classify_ticket(subject, body)
+    ticket_context = get_ticket_context(ticket_id)
+    if not ticket_context:
+        return {"error": "Ticket not found"}
 
-    # 2. Assemble context
-    customer_context = get_customer_context(customer_id)
-    if not customer_context:
-        return {
-            "error": "Customer not found",
-            "ticket_id": ticket_id
-        }
+    conversation = init_conversation(ticket_id)
 
-    order_info = get_order_info(order_id) if order_id else {}
-    product_info = get_product_info(product_id) if product_id else {}
-    eligibility = assess_return_eligibility(order_info, product_info) if order_id and product_id else {}
+    add_message(ticket_id, "customer", customer_message)
 
-    context = TicketContext(
-        ticket_id=ticket_id,
-        category=category,
-        subject=subject,
-        customer_context=customer_context,
-        order_info=order_info,
-        product_info=product_info,
-        eligibility=eligibility
-    )
+    ticket_context.category = classify_issue(customer_message)
 
-    # 3. Make automation decision
-    automation_decision = make_automation_decision(
-        category,
-        customer_context,
-        order_info,
-        eligibility
-    )
+    bot_response = generate_response(ticket_context, conversation, customer_message)
 
-    # 4. Generate response using Claude API (real-time)
-    response = generate_response(subject, body, category, context, automation_decision)
+    add_message(ticket_id, "agent", bot_response)
 
-    # 5. Assemble result
     return {
         "ticket_id": ticket_id,
-        "category": category,
-        "customer_cohort": f"{customer_context.cohort_gender} ({customer_context.cohort_month})",
-        "customer_ltv": customer_context.lifetime_value,
-        "automation_decision": automation_decision["action"],
-        "automation_reasoning": automation_decision["reasoning"],
-        "priority": automation_decision["priority"],
-        "agent_response": response
+        "customer_name": ticket_context.customer.name,
+        "customer_ltv": ticket_context.customer.ltv,
+        "bot_response": bot_response,
+        "category": ticket_context.category,
+        "suggested_responses": get_suggested_responses(ticket_context.category)
     }
 
 
 if __name__ == "__main__":
-    # Load data on startup
     load_data()
-    print("Data loaded successfully")
+    print("✅ Support agent ready")

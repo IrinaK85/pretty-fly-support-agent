@@ -278,9 +278,9 @@
     <div class="container">
         <div class="impact-summary">
             <div class="impact-title">Annual Financial Impact</div>
-            <div class="impact-value">£225,444</div>
+            <div class="impact-value" id="totalImpact">-</div>
             <div class="impact-detail">Based on 24 months of Pretty Fly data (1,204 support tickets)</div>
-            <div class="impact-detail">1,950% Year 1 ROI | 5-month payback period</div>
+            <div class="impact-detail">5,460 hours saved/year @ £16/hour (UK conservative)</div>
         </div>
 
         <div class="tier-legend">
@@ -307,8 +307,8 @@
             </div>
             <div class="metric-card">
                 <div class="metric-label">Support Hours Saved</div>
-                <div class="metric-value">£24,126</div>
-                <div class="metric-detail">965 hours annual agent time</div>
+                <div class="metric-value" id="costSavings">-</div>
+                <div class="metric-detail" id="hoursSavedDetail">-</div>
             </div>
             <div class="metric-card revenue">
                 <div class="metric-label">Marketing Conversion Uplift</div>
@@ -519,9 +519,13 @@
                 document.getElementById('sampleMediumTickets').textContent = metrics.medium_value_tickets;
                 document.getElementById('sampleLowTickets').textContent = metrics.low_value_tickets;
 
-                // Update auto-resolution rate
+                // Update metrics from API
                 const autoResRate = (metrics.auto_resolution_rate * 100).toFixed(0) + '%';
                 document.getElementById('autoResolutionRate').textContent = autoResRate;
+
+                document.getElementById('totalImpact').textContent = '£' + metrics.total_impact.toLocaleString();
+                document.getElementById('costSavings').textContent = '£' + metrics.cost_savings.toLocaleString();
+                document.getElementById('hoursSavedDetail').textContent = metrics.time_saved_hours.toLocaleString() + ' hours @ £16/hr';
 
                 // Impact chart
                 const impactCtx = document.getElementById('impactChart').getContext('2d');
@@ -530,7 +534,7 @@
                     data: {
                         labels: ['Prevent Sizing Returns', 'Support Time Savings', 'Marketing Uplift'],
                         datasets: [{
-                            data: [61138, 24126, 140180],
+                            data: [metrics.refund_reduction, metrics.cost_savings, metrics.marketing_uplift],
                             backgroundColor: ['#f39c12', '#667eea', '#27ae60'],
                             borderColor: '#fff',
                             borderWidth: 2

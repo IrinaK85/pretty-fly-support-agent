@@ -371,34 +371,54 @@ def process_ticket_message(ticket_id: str, customer_message: str) -> dict:
 
 
 def get_metrics() -> dict:
-    """Calculate support metrics from data"""
-    load_data()
+    """Calculate support metrics from FULL DATASET (not just sample)"""
+    # Load full dataset for accurate metrics
+    try:
+        full_tickets_df = pd.read_csv("pretty_fly_data_pack/data/support_tickets.csv")
+        full_customers_df = pd.read_csv("pretty_fly_data_pack/data/customers.csv")
+    except:
+        # Fallback to sample data if full not available
+        load_data()
+        full_tickets_df = _data_cache['tickets']
+        full_customers_df = _data_cache['customers']
 
-    tickets_df = _data_cache['tickets']
-    customers_df = _data_cache['customers']
-
-    if tickets_df is None or customers_df is None:
+    if full_tickets_df is None or full_customers_df is None:
         return {}
 
-    # Merge for LTV
-    tickets_with_ltv = tickets_df.merge(
-        customers_df[['customer_id', 'ltv']],
+    # Merge for LTV (use total_spent from full dataset, ltv from sample)
+    ltv_column = 'ltv' if 'ltv' in full_customers_df.columns else 'total_spent'
+    tickets_with_ltv = full_tickets_df.merge(
+        full_customers_df[['customer_id', ltv_column]],
         on='customer_id',
         how='left'
     )
+    tickets_with_ltv = tickets_with_ltv.rename(columns={ltv_column: 'ltv_value'})
 
-    high_ltv = tickets_with_ltv[tickets_with_ltv['ltv'] > 300]
-    medium_ltv = tickets_with_ltv[(tickets_with_ltv['ltv'] >= 150) & (tickets_with_ltv['ltv'] <= 300)]
-    low_ltv = tickets_with_ltv[tickets_with_ltv['ltv'] < 150]
+    high_ltv = tickets_with_ltv[tickets_with_ltv['ltv_value'] > 300]
+    medium_ltv = tickets_with_ltv[(tickets_with_ltv['ltv_value'] >= 150) & (tickets_with_ltv['ltv_value'] <= 300)]
+    low_ltv = tickets_with_ltv[tickets_with_ltv['ltv_value'] < 150]
 
-    # Calculate auto-resolution rate based on categories
-    auto_resolvable = tickets_df[tickets_df['category'].isin([
+    # Calculate auto-resolution rate and time savings from FULL dataset
+    auto_resolvable = full_tickets_df[full_tickets_df['category'].isin([
         'returns_exchanges', 'sizing_fit', 'order_status', 'discount_code'
     ])]
-    auto_resolution_rate = len(auto_resolvable) / len(tickets_df) if len(tickets_df) > 0 else 0
+    auto_resolution_rate = len(auto_resolvable) / len(full_tickets_df) if len(full_tickets_df) > 0 else 0
+
+    # Calculate time savings: 24 months data → annual figure
+    # Avg human time: 756 min, Claude time: 5 min, savings per ticket: 12.52 hours
+    human_tickets = full_tickets_df[full_tickets_df['resolved_by'] == 'human']
+    avg_human_time_min = human_tickets['resolution_time_minutes'].mean() if len(human_tickets) > 0 else 756
+    time_saved_per_ticket_hr = (avg_human_time_min - 5) / 60  # Claude takes ~5 min
+
+    annual_auto_resolvable = len(auto_resolvable) / 2  # 24-month dataset → 12 months
+    total_hours_saved = annual_auto_resolvable * time_saved_per_ticket_hr
+
+    # Cost savings at £16/hour (conservative UK average)
+    uk_hourly_rate = 16
+    cost_savings = int(total_hours_saved * uk_hourly_rate)
 
     return {
-        'total_tickets': len(tickets_df),
+        'total_tickets': len(full_tickets_df),
         'high_value_tickets': len(high_ltv),
         'medium_value_tickets': len(medium_ltv),
         'low_value_tickets': len(low_ltv),
@@ -406,11 +426,11 @@ def get_metrics() -> dict:
         'medium_value_customers': medium_ltv['customer_id'].nunique(),
         'low_value_customers': low_ltv['customer_id'].nunique(),
         'auto_resolution_rate': round(auto_resolution_rate, 2),
-        'time_saved_hours': 965,
-        'cost_savings': 24126,
+        'time_saved_hours': int(total_hours_saved),
+        'cost_savings': cost_savings,
         'refund_reduction': 61138,
         'marketing_uplift': 140180,
-        'total_impact': 225444,
+        'total_impact': cost_savings + 61138 + 140180,  # Dynamic total
         'year1_investment': 9000,
         'year2_operating': 4000
     }

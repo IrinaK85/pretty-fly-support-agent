@@ -277,7 +277,8 @@
         <div class="impact-summary">
             <div class="impact-title">Annual Financial Impact</div>
             <div class="impact-value">£171,219</div>
-            <div class="impact-detail">with 756% ROI on a £20k system investment</div>
+            <div class="impact-detail">Based on 24 months of Pretty Fly data (1,204 support tickets)</div>
+            <div class="impact-detail">756% ROI on a £20k system investment</div>
         </div>
 
         <div class="tier-legend">
@@ -376,27 +377,48 @@
             </div>
         </div>
 
-        <h2>By the Numbers</h2>
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-label">Total Support Tickets</div>
-                <div class="metric-value" id="totalTickets">-</div>
-                <div class="metric-detail">in Pretty Fly's data</div>
+        <h2>Data Breakdown</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #333;">Demo Sample (28 tickets)</div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr;">
+                    <div class="metric-card high">
+                        <div class="metric-label">High-Value Tickets</div>
+                        <div class="metric-value" id="sampleHighTickets">-</div>
+                        <div class="metric-detail">53.6%</div>
+                    </div>
+                    <div class="metric-card medium">
+                        <div class="metric-label">Medium-Value Tickets</div>
+                        <div class="metric-value" id="sampleMediumTickets">-</div>
+                        <div class="metric-detail">25.0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Low-Value Tickets</div>
+                        <div class="metric-value" id="sampleLowTickets">-</div>
+                        <div class="metric-detail">21.4%</div>
+                    </div>
+                </div>
             </div>
-            <div class="metric-card high">
-                <div class="metric-label">High-Value Tickets</div>
-                <div class="metric-value" id="highTickets">-</div>
-                <div class="metric-detail">high priority handling</div>
-            </div>
-            <div class="metric-card medium">
-                <div class="metric-label">Medium-Value Tickets</div>
-                <div class="metric-value" id="mediumTickets">-</div>
-                <div class="metric-detail">standard processing</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Low-Value Tickets</div>
-                <div class="metric-value" id="lowTickets">-</div>
-                <div class="metric-detail">smart escalation</div>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #333;">Full Database (1,204 tickets)</div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr;">
+                    <div class="metric-card high">
+                        <div class="metric-label">High-Value Tickets</div>
+                        <div class="metric-value">670</div>
+                        <div class="metric-detail">55.6%</div>
+                    </div>
+                    <div class="metric-card medium">
+                        <div class="metric-label">Medium-Value Tickets</div>
+                        <div class="metric-value">309</div>
+                        <div class="metric-detail">25.7%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Low-Value Tickets</div>
+                        <div class="metric-value">225</div>
+                        <div class="metric-detail">18.7%</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -411,11 +433,10 @@
                 const response = await fetch('/api/metrics');
                 const metrics = await response.json();
 
-                // Update metric cards
-                document.getElementById('totalTickets').textContent = metrics.total_tickets;
-                document.getElementById('highTickets').textContent = metrics.high_value_tickets;
-                document.getElementById('mediumTickets').textContent = metrics.medium_value_tickets;
-                document.getElementById('lowTickets').textContent = metrics.low_value_tickets;
+                // Update metric cards for sample
+                document.getElementById('sampleHighTickets').textContent = metrics.high_value_tickets;
+                document.getElementById('sampleMediumTickets').textContent = metrics.medium_value_tickets;
+                document.getElementById('sampleLowTickets').textContent = metrics.low_value_tickets;
 
                 // Impact chart
                 const impactCtx = document.getElementById('impactChart').getContext('2d');

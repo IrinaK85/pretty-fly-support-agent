@@ -17,12 +17,6 @@
             color: #333;
         }
 
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* Header */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -43,18 +37,33 @@
             font-weight: 600;
         }
 
-        .header-status {
-            font-size: 12px;
-            opacity: 0.9;
+        .header-links {
+            display: flex;
+            gap: 20px;
         }
 
-        /* Tickets List */
+        .header-link {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .header-link:hover {
+            opacity: 1;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+            margin-top: 60px;
+        }
+
         .sidebar {
             width: 320px;
             background: white;
             border-right: 1px solid #e0e0e0;
             overflow-y: auto;
-            margin-top: 60px;
             display: flex;
             flex-direction: column;
         }
@@ -92,21 +101,42 @@
         .ticket-item-subject {
             font-size: 13px;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .ticket-item-ltv {
+            display: flex;
+            justify-content: space-between;
             font-size: 12px;
-            color: #667eea;
-            font-weight: 600;
+            align-items: center;
         }
 
-        /* Main Content */
+        .ltv-badge {
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .ltv-badge.high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .ltv-badge.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .ltv-badge.low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
         .main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            margin-top: 60px;
             background: white;
         }
 
@@ -125,9 +155,8 @@
         .customer-info {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 15px;
             margin-top: 15px;
-            font-size: 13px;
         }
 
         .info-item {
@@ -135,11 +164,13 @@
             padding: 12px;
             border-radius: 4px;
             border: 1px solid #e0e0e0;
+            font-size: 13px;
         }
 
         .info-label {
             color: #999;
             margin-bottom: 5px;
+            font-size: 11px;
         }
 
         .info-value {
@@ -147,11 +178,16 @@
             color: #333;
         }
 
-        .ltv-high {
-            color: #27ae60;
+        .ltv-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Conversation */
+        .tier-indicator {
+            font-size: 16px;
+        }
+
         .conversation {
             flex: 1;
             overflow-y: auto;
@@ -220,7 +256,6 @@
             font-size: 16px;
         }
 
-        /* Input Area */
         .input-area {
             padding: 20px;
             border-top: 1px solid #e0e0e0;
@@ -317,17 +352,18 @@
 <body>
     <div class="header">
         <h1>🎀 Pretty Fly Support</h1>
-        <div class="header-status">AI-Powered Support Dashboard</div>
+        <div class="header-links">
+            <a href="/" class="header-link">Conversations</a>
+            <a href="/metrics" class="header-link">📊 Metrics</a>
+        </div>
     </div>
 
     <div class="container">
-        <!-- Tickets Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">Support Tickets</div>
             <div id="ticketsList"></div>
         </div>
 
-        <!-- Main Content -->
         <div class="main">
             <div id="ticketView"></div>
         </div>
@@ -336,7 +372,6 @@
     <script>
         let currentTicketId = null;
 
-        // Load tickets on page load
         async function loadTickets() {
             try {
                 const response = await fetch('/api/tickets');
@@ -347,11 +382,13 @@
                     <div class="ticket-item" onclick="selectTicket('${ticket.ticket_id}', this)">
                         <div class="ticket-item-name">${ticket.customer_name}</div>
                         <div class="ticket-item-subject">${ticket.subject}</div>
-                        <div class="ticket-item-ltv">LTV: £${ticket.ltv.toFixed(2)}</div>
+                        <div class="ticket-item-ltv">
+                            <span>£${ticket.ltv.toFixed(0)}</span>
+                            <span class="ltv-badge ${ticket.ltv_tier}">${ticket.ltv_color}</span>
+                        </div>
                     </div>
                 `).join('');
 
-                // Select first ticket
                 if (tickets.length > 0) {
                     selectTicket(tickets[0].ticket_id, ticketsList.firstChild);
                 }
@@ -360,23 +397,23 @@
             }
         }
 
-        // Select and load a ticket
         async function selectTicket(ticketId, element) {
             currentTicketId = ticketId;
-
-            // Update UI
             document.querySelectorAll('.ticket-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
-
-            // Load ticket details
             await loadTicketDetail(ticketId);
         }
 
-        // Load ticket details and conversation
         async function loadTicketDetail(ticketId) {
             try {
                 const response = await fetch(`/api/ticket/${ticketId}`);
                 const ticket = await response.json();
+
+                const tierColor = {
+                    'high': '🟢 High-Value',
+                    'medium': '🟡 Medium-Value',
+                    'low': '🔴 Low-Value'
+                };
 
                 const ticketView = document.getElementById('ticketView');
                 ticketView.innerHTML = `
@@ -389,15 +426,18 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Lifetime Value</div>
-                                <div class="info-value ${ticket.customer_ltv > 200 ? 'ltv-high' : ''}">£${ticket.customer_ltv.toFixed(2)}</div>
+                                <div class="info-value ltv-value">
+                                    <span class="tier-indicator">${ticket.customer_ltv_color}</span>
+                                    <span>£${ticket.customer_ltv.toFixed(0)}</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Customer Tier</div>
+                                <div class="info-value">${tierColor[ticket.customer_ltv_tier]}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Orders</div>
                                 <div class="info-value">${ticket.customer_order_count}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Category</div>
-                                <div class="info-value">${ticket.category}</div>
                             </div>
                         </div>
                     </div>
@@ -427,27 +467,23 @@
                     </div>
                 `;
 
-                // Focus input
                 document.getElementById('messageInput').focus();
             } catch (error) {
                 console.error('Error loading ticket:', error);
             }
         }
 
-        // Send suggested message
         async function sendSuggestedMessage(message) {
             document.getElementById('messageInput').value = message;
             await sendMessage();
         }
 
-        // Send custom message
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
 
             if (!message || !currentTicketId) return;
 
-            // Add loading indicator
             const conversation = document.getElementById('conversation');
             conversation.innerHTML += `
                 <div class="message customer">
@@ -470,17 +506,14 @@
 
                 const result = await response.json();
 
-                // Remove loading indicator
                 conversation.querySelector('.loading').remove();
 
-                // Add bot response
                 conversation.innerHTML += `
                     <div class="message agent">
                         <div class="message-bubble">${result.bot_response}</div>
                     </div>
                 `;
 
-                // Update suggested messages
                 const suggestedArea = document.querySelector('.suggested-messages');
                 suggestedArea.innerHTML = result.suggested_responses.map(r => `
                     <button class="suggested-btn" onclick="sendSuggestedMessage('${r.replace(/'/g, "\\'")}')">${r}</button>
@@ -496,7 +529,6 @@
             }
         }
 
-        // Load tickets on page load
         loadTickets();
     </script>
 </body>

@@ -7,7 +7,8 @@ from flask import Flask, render_template, request, jsonify
 import os
 from support_agent import (
     load_data, get_sample_tickets, get_ticket_context,
-    get_conversation, process_ticket_message, get_suggested_responses
+    get_conversation, process_ticket_message, get_suggested_responses,
+    get_metrics, LTV_TIERS
 )
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -23,6 +24,12 @@ except Exception as e:
 def index():
     """Main dashboard page"""
     return render_template('dashboard.html')
+
+
+@app.route('/metrics')
+def metrics_page():
+    """Metrics dashboard page"""
+    return render_template('metrics.html')
 
 
 @app.route('/api/tickets', methods=['GET'])
@@ -45,6 +52,7 @@ def get_ticket(ticket_id):
 
         conversation = get_conversation(ticket_id)
         suggested = get_suggested_responses(context.category)
+        tier_info = LTV_TIERS[context.customer.ltv_tier]
 
         return jsonify({
             'ticket_id': ticket_id,
@@ -52,6 +60,8 @@ def get_ticket(ticket_id):
             'customer_name': context.customer.name,
             'customer_email': context.customer.email,
             'customer_ltv': context.customer.ltv,
+            'customer_ltv_tier': context.customer.ltv_tier,
+            'customer_ltv_color': tier_info['color'],
             'customer_order_count': context.customer.order_count,
             'subject': context.subject,
             'category': context.category,
@@ -87,6 +97,16 @@ def add_message(ticket_id):
             return jsonify(result), 404
 
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/metrics', methods=['GET'])
+def get_metrics_data():
+    """Get support metrics"""
+    try:
+        metrics = get_metrics()
+        return jsonify(metrics)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -1,14 +1,25 @@
 ticket_id,customer_id,created_at,channel,status,priority,category,subject,related_order_id,related_product_id,first_response_at,resolved_at,resolution_time_minutes,satisfaction_rating,resolved_by
-tkt_00167,cust_004557,2024-10-10T13:36:39,instagram_dm,resolved,high,returns_exchanges,Return label not working,ord_006602,prod_00027,2024-10-10T12:17:00,2024-10-10T23:15:00,1275,5.0,human
-tkt_00249,cust_014825,2025-09-30T21:18:53,chat,resolved,low,returns_exchanges,Return label not working,ord_029452,prod_00025,2025-09-30T12:51:00,2025-09-30T23:26:00,1226,,human
-tkt_00276,cust_006899,2025-11-04T11:21:41,instagram_dm,resolved,low,order_status,Order hasn't arrived,ord_031773,prod_00035,2025-11-04T13:04:00,2025-11-04T11:30:00,90,2.0,human
-tkt_00295,cust_017463,2025-12-22T20:05:39,chat,resolved,low,sizing_fit,Sizing question about Womens Fitted Tee,ord_037421,prod_00051,2025-12-22T10:02:00,2025-12-22T10:19:00,19,1.0,bot
-tkt_00370,cust_018148,2026-04-09T14:31:55,email,resolved,normal,order_status,No delivery update for Winter Logo Tee,ord_045350,prod_00031,2026-04-09T11:08:00,2026-04-09T23:12:00,792,,human
-tkt_00372,cust_008470,2025-01-15T10:15:12,email,resolved,high,sizing_fit,Is the Heritage Tee true to size?,ord_014498,prod_00012,2025-01-15T11:10:00,2025-01-15T23:33:00,993,4.0,human
-tkt_00467,cust_007683,2025-09-20T12:23:31,email,resolved,normal,order_status,Where's my order?,ord_029308,prod_00012,2025-09-20T10:45:00,2025-09-20T19:47:00,587,,human
-tkt_00581,cust_006332,2025-08-29T21:19:47,chat,resolved,normal,order_status,Where's my order?,ord_027363,prod_00008,2025-08-29T11:59:00,2025-08-29T23:43:00,943,,human
-tkt_00613,cust_006899,2025-12-03T12:11:42,instagram_dm,resolved,normal,product_quality,Colour faded after wash,ord_034800,prod_00002,2025-12-03T12:57:00,2025-12-03T20:53:00,653,,human
-tkt_00718,cust_010930,2026-02-28T09:23:13,email,resolved,low,order_status,Where's my order?,ord_042655,prod_00029,2026-02-28T12:41:00,2026-02-28T21:38:00,698,,human
-tkt_00799,cust_007069,2024-12-01T18:50:37,email,resolved,low,sizing_fit,Size exchange needed,ord_011311,prod_00024,2024-12-01T11:45:00,2024-12-01T23:33:00,1413,,human
-tkt_01016,cust_017254,2026-01-02T12:37:51,email,resolved,normal,product_quality,Colour faded after wash,ord_038250,prod_00007,2026-01-02T12:35:00,2026-01-02T23:23:00,1223,,human
-tkt_01025,cust_003757,2024-09-09T21:41:51,chat,resolved,normal,drop_restock,Will there be more sizes?,ord_005162,prod_00026,2024-09-09T10:03:00,2024-09-09T10:13:00,13,,bot
+tkt_00001,cust_000339,2024-06-16T09:57:10,email,resolved,normal,order_status,No delivery update for Boardshort Sweatpants,ord_000968,prod_00021,2024-06-16T10:02:00,2024-06-16T10:20:00,20,,bot
+tkt_00002,cust_017287,2026-05-13T19:14:31,chat,resolved,low,sizing_fit,Is the Womens Relaxed Hoodie true to size?,ord_048219,prod_00047,2026-05-13T11:32:00,2026-05-13T13:23:00,203,,human
+tkt_00004,cust_017892,2026-04-15T17:01:27,email,closed,normal,product_quality,Colour faded after wash,ord_045937,prod_00043,2026-04-15T11:01:00,2026-04-15T20:43:00,643,,human
+tkt_00006,cust_005383,2024-12-30T11:17:17,email,resolved,low,order_status,Tracking not updating,ord_012652,prod_00030,2024-12-30T10:03:00,2024-12-30T10:29:00,29,,bot
+tkt_00007,cust_006888,2024-12-12T18:52:14,email,resolved,normal,returns_exchanges,Exchange for different size,ord_010847,prod_00026,2024-12-12T11:31:00,2024-12-12T23:01:00,1381,,human
+tkt_00008,cust_012074,2026-03-05T12:30:05,email,resolved,high,drop_restock,Next drop date?,ord_042470,prod_00027,2026-03-05T10:03:00,2026-03-05T10:28:00,28,5.0,bot
+tkt_00009,cust_016395,2025-12-02T12:51:32,email,resolved,low,sizing_fit,Sizing question about Pigment Dyed Tee,ord_034768,prod_00040,2025-12-02T10:04:00,2025-12-02T10:27:00,27,5.0,bot
+tkt_00012,cust_001979,2024-07-30T10:30:10,chat,resolved,high,discount_code,Can I get a code?,ord_002982,prod_00005,2024-07-30T10:01:00,2024-07-30T10:13:00,13,5.0,bot
+tkt_00003,cust_016236,2025-11-13T14:37:04,email,resolved,low,order_status,Tracking not updating,ord_033351,prod_00012,2025-11-13T10:04:00,2025-11-13T10:09:00,9,,bot
+tkt_00005,cust_002026,2024-07-19T18:09:06,email,resolved,normal,order_status,Order hasn't arrived,ord_002406,prod_00018,2024-07-19T11:01:00,2024-07-19T15:18:00,318,,human
+tkt_00010,cust_017224,2025-12-06T20:53:11,email,resolved,low,returns_exchanges,Return label not working,ord_035946,prod_00003,2025-12-06T10:03:00,2025-12-06T10:14:00,14,4.0,bot
+tkt_00011,cust_019547,2026-02-25T15:25:28,chat,resolved,low,discount_code,Can I get a code?,ord_042097,prod_00031,2026-02-25T10:03:00,2026-02-25T10:07:00,7,3.0,bot
+tkt_00013,cust_017263,2026-01-06T21:49:13,chat,resolved,normal,discount_code,Applied wrong code,ord_039402,prod_00037,2026-01-06T12:17:00,2026-01-06T23:25:00,805,,human
+tkt_00021,cust_008913,2026-01-11T15:06:58,email,resolved,normal,sizing_fit,Sizing question about Womens Logo Cap,ord_038816,prod_00049,2026-01-11T13:45:00,2026-01-11T23:40:00,1000,,human
+tkt_00022,cust_018694,2026-01-19T16:02:45,email,resolved,high,other,Collaboration enquiry,ord_039840,prod_00027,2026-01-19T13:28:00,2026-01-19T11:12:00,72,,human
+tkt_00023,cust_001089,2025-07-01T13:32:51,email,closed,normal,product_quality,Print peeling,ord_024137,prod_00019,2025-07-01T10:44:00,2025-07-01T20:58:00,658,,human
+tkt_00017,cust_016934,2025-12-09T17:30:51,email,resolved,normal,returns_exchanges,Return label not working,ord_035206,prod_00037,2025-12-09T12:46:00,2025-12-09T14:57:00,297,,human
+tkt_00024,cust_017955,2025-12-28T11:29:05,email,resolved,normal,product_quality,Print peeling,ord_037767,prod_00043,2025-12-28T10:04:00,2025-12-28T10:16:00,16,,bot
+tkt_00031,cust_003111,2024-09-05T09:11:44,email,resolved,normal,sizing_fit,Washed Logo Tee doesn't fit right,ord_004082,prod_00016,2024-09-05T10:02:00,2024-09-05T10:21:00,21,,bot
+tkt_00032,cust_002149,2024-08-02T20:01:00,chat,closed,normal,discount_code,Code expired before I could use it,ord_002545,prod_00006,2024-08-02T10:03:00,2024-08-02T10:09:00,9,,bot
+tkt_00038,cust_016938,2025-11-28T17:29:50,instagram_dm,resolved,normal,product_quality,Colour faded after wash,ord_035210,prod_00004,2025-11-28T11:19:00,2025-11-28T23:51:00,1311,2.0,human
+tkt_00045,cust_012346,2025-06-08T11:03:16,instagram_dm,resolved,high,sizing_fit,Staple Tee doesn't fit right,ord_022982,prod_00006,2025-06-08T10:04:00,2025-06-08T10:13:00,13,,bot
+tkt_00061,cust_016723,2025-12-06T19:14:45,email,resolved,high,drop_restock,Will there be more sizes?,ord_034631,prod_00012,2025-12-06T10:50:00,2025-12-06T12:31:00,151,4.0,human
+tkt_00069,cust_009103,2025-02-15T10:46:10,email,resolved,normal,sizing_fit,Track Hoodie doesn't fit right,ord_015590,prod_00015,2025-02-15T10:03:00,2025-02-15T10:15:00,15,,bot

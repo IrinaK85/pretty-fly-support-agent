@@ -9,25 +9,47 @@ from support_agent import process_ticket, load_data, _data_cache
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Load data on startup
-@app.before_request
-def startup():
-    """Load CSV data on first request"""
-    if _data_cache['customers'] is None:
-        load_data()
+# Initialize data on app startup
+try:
+    load_data()
+except Exception as e:
+    print(f"Warning: Could not load CSV data on startup: {e}")
+    # Continue - API will work with empty/mock data
 
 
 def get_sample_tickets():
-    """Get 10-15 real tickets from loaded data for demo"""
+    """Get sample tickets (real if data loaded, mock otherwise)"""
     load_data()
 
     orders_df = _data_cache['orders']
     customers_df = _data_cache['customers']
 
-    if orders_df is None or customers_df is None:
-        return []
+    if orders_df is None or customers_df is None or len(orders_df) == 0:
+        # Return mock tickets for demo when no data available
+        return [
+            {
+                'ticket_id': 'demo_001',
+                'customer_id': 'cust_demo_001',
+                'order_id': 'ord_demo_001',
+                'product_id': 'prod_demo_001',
+                'subject': 'Help with sizing on the Heritage Hoodie',
+                'category': 'sizing_fit',
+                'customer_gender': 'Mens',
+                'days_since_order': 5
+            },
+            {
+                'ticket_id': 'demo_002',
+                'customer_id': 'cust_demo_002',
+                'order_id': 'ord_demo_002',
+                'product_id': 'prod_demo_002',
+                'subject': 'Can I return my order?',
+                'category': 'returns_exchanges',
+                'customer_gender': 'Womens',
+                'days_since_order': 10
+            }
+        ]
 
-    # Simple sample: take first 15 unique customer orders
+    # Real tickets if data available
     sample_orders = orders_df.head(15)
 
     tickets = []
@@ -39,14 +61,14 @@ def get_sample_tickets():
                 'ticket_id': f"ticket_{order_row['order_id']}",
                 'customer_id': order_row['customer_id'],
                 'order_id': order_row['order_id'],
-                'product_id': None,  # Simplified
+                'product_id': None,
                 'subject': f"Question about order {order_row['order_id']}",
                 'category': 'order_status',
                 'customer_gender': customer_row.get('gender_segment_affinity', 'Unknown'),
                 'days_since_order': 0
             })
 
-    return tickets
+    return tickets if tickets else get_sample_tickets()  # Fallback to mock if no real tickets
 
 
 @app.route('/')

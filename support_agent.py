@@ -28,7 +28,7 @@ DATA_DIR = "pretty_fly_data_pack/data"
 
 
 def load_data():
-    """Load all CSV data into memory"""
+    """Load all CSV data into memory (optional for Vercel deployment)"""
     global _data_cache
 
     if _data_cache['customers'] is not None:
@@ -41,9 +41,18 @@ def load_data():
         _data_cache['variants'] = pd.read_csv(f"{DATA_DIR}/variants.csv")
         _data_cache['products'] = pd.read_csv(f"{DATA_DIR}/products.csv")
         _data_cache['refunds'] = pd.read_csv(f"{DATA_DIR}/refunds.csv")
+        return True
+    except FileNotFoundError:
+        print(f"Warning: CSV data files not found at {DATA_DIR}. Running with mock data.")
+        # Create empty DataFrames so API still works
+        _data_cache['customers'] = pd.DataFrame(columns=['customer_id', 'created_at', 'gender_segment_affinity'])
+        _data_cache['orders'] = pd.DataFrame(columns=['order_id', 'customer_id', 'created_at', 'total_price', 'financial_status', 'fulfillment_status'])
+        _data_cache['refunds'] = pd.DataFrame(columns=['order_id', 'refund_id'])
+        _data_cache['products'] = pd.DataFrame(columns=['product_id', 'title', 'product_type', 'gender_segment'])
+        return False
     except Exception as e:
-        print(f"Warning: Could not load all CSV data: {e}")
-        # Return gracefully for API serving even if data incomplete
+        print(f"Warning: Could not load CSV data: {e}")
+        return False
 
 
 @dataclass
@@ -102,7 +111,17 @@ def get_customer_context(customer_id: str) -> Optional[CustomerContext]:
     # Get customer info
     customer = customers_df[customers_df['customer_id'] == customer_id]
     if customer.empty:
-        return None
+        # Return mock context if no data (for Vercel deployment without CSV files)
+        return CustomerContext(
+            customer_id=customer_id,
+            cohort_month="unknown",
+            cohort_gender="Unknown",
+            lifetime_value=0,
+            repeat_rate=0,
+            total_orders=0,
+            refund_rate=0,
+            recent_orders=[]
+        )
 
     customer_row = customer.iloc[0]
     customer_id = customer_row['customer_id']
@@ -112,7 +131,17 @@ def get_customer_context(customer_id: str) -> Optional[CustomerContext]:
     # Get customer orders
     customer_orders = orders_df[orders_df['customer_id'] == customer_id]
     if customer_orders.empty:
-        return None
+        # Return basic context if no orders
+        return CustomerContext(
+            customer_id=customer_id,
+            cohort_month=cohort_month,
+            cohort_gender=cohort_gender,
+            lifetime_value=0,
+            repeat_rate=0,
+            total_orders=0,
+            refund_rate=0,
+            recent_orders=[]
+        )
 
     total_orders = len(customer_orders)
     lifetime_value = customer_orders['total_price'].sum()

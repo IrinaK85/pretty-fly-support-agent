@@ -276,9 +276,9 @@
     <div class="container">
         <div class="impact-summary">
             <div class="impact-title">Annual Financial Impact</div>
-            <div class="impact-value">£171,219</div>
+            <div class="impact-value">£225,444</div>
             <div class="impact-detail">Based on 24 months of Pretty Fly data (1,204 support tickets)</div>
-            <div class="impact-detail">756% ROI on a £20k system investment</div>
+            <div class="impact-detail">1,950% Year 1 ROI | 5-month payback period</div>
         </div>
 
         <div class="tier-legend">
@@ -305,18 +305,18 @@
             </div>
             <div class="metric-card">
                 <div class="metric-label">Support Hours Saved</div>
-                <div class="metric-value">965</div>
-                <div class="metric-detail">hours per year</div>
+                <div class="metric-value">£24,126</div>
+                <div class="metric-detail">965 hours annual agent time</div>
             </div>
             <div class="metric-card revenue">
-                <div class="metric-label">Revenue Impact</div>
-                <div class="metric-value">£85,955</div>
-                <div class="metric-detail">retention + repeat purchases</div>
+                <div class="metric-label">Marketing Conversion Uplift</div>
+                <div class="metric-value">£140,180</div>
+                <div class="metric-detail">10% uplift across all channels</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">Refund Reduction</div>
+                <div class="metric-label">Prevent Sizing Returns</div>
                 <div class="metric-value">£61,138</div>
-                <div class="metric-detail">preventing sizing issues</div>
+                <div class="metric-detail">20% of sizing-related refunds</div>
             </div>
         </div>
 
@@ -372,6 +372,85 @@
                     <div class="comparison-item">
                         <span class="comparison-label-text">Agent Review</span>
                         <span class="comparison-value">Full context</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Estimated System Costs & ROI</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #333;">Year 1 Investment</div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr;">
+                    <div class="metric-card">
+                        <div class="metric-label">Development</div>
+                        <div class="metric-value">£5,000</div>
+                        <div class="metric-detail">System architecture & build</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Claude API</div>
+                        <div class="metric-value">£900</div>
+                        <div class="metric-detail">~900 API calls/month</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Hosting</div>
+                        <div class="metric-value">£300</div>
+                        <div class="metric-detail">Vercel + database</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Maintenance</div>
+                        <div class="metric-value">£2,000</div>
+                        <div class="metric-detail">Support & optimization</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Infrastructure</div>
+                        <div class="metric-value">£500</div>
+                        <div class="metric-detail">Logging & monitoring</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Contingency</div>
+                        <div class="metric-value">£300</div>
+                        <div class="metric-detail">Buffer for unknowns</div>
+                    </div>
+                    <div class="metric-card high" style="border-left-color: #27ae60; font-weight: 600;">
+                        <div class="metric-label">YEAR 1 TOTAL</div>
+                        <div class="metric-value">£9,000</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #333;">Financial Impact</div>
+                <div class="metrics-grid" style="grid-template-columns: 1fr;">
+                    <div class="metric-card">
+                        <div class="metric-label">Annual Benefit</div>
+                        <div class="metric-value">£225,444</div>
+                        <div class="metric-detail">From all three value sources</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Year 2+ Cost</div>
+                        <div class="metric-value">£4,000</div>
+                        <div class="metric-detail">Recurring annual operating</div>
+                    </div>
+                    <div class="metric-card high">
+                        <div class="metric-label">Payback Period</div>
+                        <div class="metric-value">5 months</div>
+                        <div class="metric-detail">Until £9k investment recovered</div>
+                    </div>
+                    <div class="metric-card revenue">
+                        <div class="metric-label">Year 1 ROI</div>
+                        <div class="metric-value">1,950%</div>
+                        <div class="metric-detail">(£225k - £9k) / £9k</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Impact as % of GP</div>
+                        <div class="metric-value">12.7%</div>
+                        <div class="metric-detail">Of annual gross profit</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">3-Year Cumulative</div>
+                        <div class="metric-value">£665,444</div>
+                        <div class="metric-detail">3 × £225k - £9k initial</div>
                     </div>
                 </div>
             </div>
@@ -443,10 +522,10 @@
                 new Chart(impactCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Agent Time Savings', 'Customer Retention', 'Refund Reduction'],
+                        labels: ['Prevent Sizing Returns', 'Support Time Savings', 'Marketing Uplift'],
                         datasets: [{
-                            data: [metrics.cost_savings, metrics.revenue_impact, metrics.refund_reduction],
-                            backgroundColor: ['#667eea', '#27ae60', '#f39c12'],
+                            data: [61138, 24126, 140180],
+                            backgroundColor: ['#f39c12', '#667eea', '#27ae60'],
                             borderColor: '#fff',
                             borderWidth: 2
                         }]

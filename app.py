@@ -128,4 +128,6 @@ def server_error(e):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    import sys
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
+    app.run(debug=True, port=port)

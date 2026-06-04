@@ -402,9 +402,11 @@ def get_metrics() -> dict:
         'auto_resolution_rate': 0.76,
         'time_saved_hours': 965,
         'cost_savings': 24126,
-        'revenue_impact': 85955,
         'refund_reduction': 61138,
-        'total_impact': 171219
+        'marketing_uplift': 140180,
+        'total_impact': 225444,
+        'year1_investment': 9000,
+        'year2_operating': 4000
     }
 
 

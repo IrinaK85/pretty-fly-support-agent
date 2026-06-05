@@ -23,6 +23,8 @@ _data_cache = {
     'line_items': None,
     'products': None,
     'refunds': None,
+    'sizing_guide': None,
+    'body_size_guide': None,
 }
 
 # Conversation history storage
@@ -52,6 +54,13 @@ def load_data():
         # Load sample data for demo
         _data_cache['customers'] = pd.read_csv(os.path.join(DATA_DIR, "sample_customers.csv"))
         _data_cache['tickets'] = pd.read_csv(os.path.join(DATA_DIR, "sample_tickets.csv"))
+
+        # Load sizing guides (available)
+        try:
+            _data_cache['sizing_guide'] = pd.read_csv(os.path.join(DATA_DIR, "sizing_guide.csv"))
+            _data_cache['body_size_guide'] = pd.read_csv(os.path.join(DATA_DIR, "body_size_guide.csv"))
+        except (FileNotFoundError, Exception) as e:
+            print(f"Warning: Sizing guides not found ({e})")
 
         # Load full dataset for context enrichment (optional)
         try:
@@ -166,6 +175,27 @@ def get_product_details(product_id: str) -> str:
     details += f"  Description: {p.get('description', 'N/A')[:150]}\n"
 
     return details.strip()
+
+
+def get_product_sizing_guide(product_id: str) -> str:
+    """Get sizing measurements and fit guide for a product"""
+    load_data()
+    sizing_guide_df = _data_cache['sizing_guide']
+
+    if sizing_guide_df is None or sizing_guide_df.empty or not product_id:
+        return ""
+
+    product = sizing_guide_df[sizing_guide_df['product_id'] == product_id]
+    if product.empty:
+        return ""
+
+    p = product.iloc[0]
+    guide = f"📏 Sizing & Fit:\n"
+    guide += f"  Fit: {p.get('fit_guide', 'N/A')}\n"
+    guide += f"  Material: {p.get('material', 'N/A')}\n"
+    guide += f"  Available sizes: {p.get('sizes', 'N/A')}\n"
+
+    return guide.strip()
 
 
 def get_customer_size_history(customer_id: str) -> str:
